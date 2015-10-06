@@ -2,32 +2,37 @@
 // Julien Perron
 // Firas Cherif
 
-var game = new Phaser.Game(1024, 600, Phaser.AUTO, 'game', {preload: preload, create: create, update: update});//,render : remder});
+var game = new Phaser.Game(1024, 600, Phaser.AUTO, 'game', {preload: preload, create: create, update: update, render : render});
 
-var server = 'http://localhost:8080/';
+
+var fish;
 
 function preload() {
 
-    game.load.image('fish', 'fish.png');
-
+    game.load.spritesheet('poisson', 'assets/poisse.png', 300, 200);
  }
 
 function create() {
 
-    var fish = game.add.sprite(200,100, 'cloud');
-    var tween = game.add.tween(fish);
-    tween.to({x: 650}, 3000);
+	game.stage.background = "#AAAAAA";
+
+    fish = game.add.sprite(0,300, 'poisson');
+    fish.animations.add('droite', [0,1,2,3,4], 5, true);
+    fish.animations.add('gauche', [6,7], 5, true);
+    fish.animations.play('droite');
+    fish.scale.setTo(0.3,0.3);
+    game.physics.enable(fish, Phaser.Physics.ARCADE);
+    game.add.tween(fish).to({ x: game.width }, 10000, Phaser.Easing.Linear.None, true);
 
 }
 
-function createPlatforms(){
+function update(){
 
-    
 }
 
 function render () {
 
-     // //debug helper
-     game.debug.bodyInfo(fish, 16, 24);
+     // debug helper
+     // game.debug.bodyInfo(fish, 16, 24);
 
 }
