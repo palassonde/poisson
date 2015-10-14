@@ -28,11 +28,11 @@ Fish.prototype.constructor = Fish;
 
 Fish.prototype.move = function (){
 
-	this.body.velocity.x += 2;
+	//this.body.velocity.x += 2;
 
 }
 
-Fish.prototype.cohesion = function (){
+Fish.prototype.cohere = function (){
 
 	var sum = new Phaser.Point();
 	var count = 0;
@@ -65,6 +65,28 @@ Fish.prototype.steer_to = function(target) {
 	var desired = Phaser.Point(target, this.position)
 	//console.log(target);
 	
+	var d = desired.getMagnitude();
+	
+	if (d > 0){
+	
+		desired.normalize();
+		
+		if (d < 100.0)
+			desired.multiply(MAX_SPEED * (d/100.0));
+		else
+			desired.multiply(MAX_SPEED);
+	
+		var steer = desired.substract(this.velocity);
+		
+		steer.limit(MAX_FORCE)
+	}
+	else{
+	
+		steer = new Phaser.Point(0,0);
+	}
+	
+	return steer;
+	
 }
 
 Fish.prototype.align = function (){
@@ -82,7 +104,7 @@ function preload() {
  
 function create() {
 
-	game.stage.backgroundColor = "#AAAAAA";
+	game.stage.backgroundColor = "#0099FF";
 	
 	banc = game.add.group();
 
@@ -98,7 +120,7 @@ function update(){
 
 	for (var x in banc.children){
 		banc.children[x].move();
-		banc.children[x].cohesion();
+		banc.children[x].cohere();
 	}
 
 }
