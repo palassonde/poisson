@@ -4,15 +4,38 @@
 
 var game = new Phaser.Game(1024, 600, Phaser.AUTO, 'game', {preload: preload, create: create, update: update, render : render});
 
+// Groupe de poissons
 var banc;
-var neighbour_radius = 50;
 
+//Constates a parametriser
+var NEIGHBOUR_RADIUS = 30;
+var MAX_SPEED = 5;
+var MAX_FORCE = 5;
+var DESIRED_SEPARATION = 10;
+var SEPARATION_WEIGHT = 10;
+var ALIGNMENT_WEIGHT = 10;
+var COHESION_WEIGHT = 10;
+
+// Fonction limitatrice ajouter a lobjet Phaser.Point
+Phaser.Point.prototype.limit = function(MAX) {
+
+	if (this.x > MAX || this.y > MAX){
+
+		this.x = MAX;
+		this.y = MAX;
+	}
+}
+
+// Constructeur de l'objet fish
 var Fish = function(x, y, group) {
 
 	Phaser.Sprite.call(this, game, x, y, 'fish');
+
+	this.velocity = new Phaser.Point(Math.random()*2-1, Math.random()*2-1);
+	this.neighbours = group;
 	
+	// Relier a lobjet sprite de phaser
 	this.anchor.setTo(0.5, 0.5);
-	this.group = group;
 	this.game.physics.arcade.enableBody(this);
 
 	// Animations
@@ -23,15 +46,35 @@ var Fish = function(x, y, group) {
 
 };
 
+// Definition de l'objet fish et de son constructeur
 Fish.prototype = Object.create(Phaser.Sprite.prototype);
 Fish.prototype.constructor = Fish;
 
-Fish.prototype.move = function (){
+// Premiere fonction du mouvement des poissons
+Fish.prototype.step = function (neighbours){
 
-	//this.body.velocity.x += 2;
+	acceleration = this.flock(neighbours);
+
+	this.velocity = Phaser.Point.add(this.velocity, acceleration);
+	this.velocity.limit(MAX_SPEED);
+	this.body.position = Phaser.Point.add(this.body.position, this.velocity);
 
 }
 
+// Algo principale qui agrege toutes les fonctions du comportement
+Fish.prototype.flock = function (neighbours){
+
+
+	var separation = this.separate(neighbours).multiply(SEPARATION_WEIGHT,SEPARATION_WEIGHT);
+	var alignment = this.align(neighbours).multiply(ALIGNMENT_WEIGHT,ALIGNMENT_WEIGHT);
+	var cohesion = this.cohere(neighbours).multiply(COHESION_WEIGHT,COHESION_WEIGHT);
+
+
+	var result = Phaser.Point.add(Phaser.Point.add(separation, alignment), cohesion);
+	return result;
+}
+
+// Algo plus bas niveau qui definit la cohesion
 Fish.prototype.cohere = function (){
 
 	var sum = new Phaser.Point();
@@ -41,31 +84,31 @@ Fish.prototype.cohere = function (){
 		
 		var distance = Phaser.Point.distance(this.body.position, banc.children[x].body.position);
 
-		if (distance > 0 && distance < neighbour_radius){
+		if (distance > 0 && distance < NEIGHBOUR_RADIUS){
 		
-			sum.add(banc.children[x].body.position.x, banc.children[x].body.position.y);
+			sum = Phaser.Point.add(sum, banc.children[x]);
 			count++;
-		}
-		
-		if (count > 0){
+		}		
+	}
+
+	if (count > 0){
 				
-			var target = new Phaser.Point(sum.x / count, sum.y / count);
-			return this.steer_to(target);
-		}
-		else {
-		
-			return sum;
-		}
-		
+		var target = new Phaser.Point(sum.x / count, sum.y / count);
+		return this.steer_to(target);
+	}
+	else {
+	
+		return sum;
 	}
 }
 
+// Algo qui determine la direction que le poisson prend
 Fish.prototype.steer_to = function(target) {
 
-	var desired = Phaser.Point(target, this.position)
-	//console.log(target);
-	
+	var desired = Phaser.Point.subtract(target, this.position);
 	var d = desired.getMagnitude();
+	// Meilelur facon de faire ?
+	//var steer = new Phaser.Point(0,0);
 	
 	if (d > 0){
 	
@@ -76,9 +119,10 @@ Fish.prototype.steer_to = function(target) {
 		else
 			desired.multiply(MAX_SPEED);
 	
-		var steer = desired.substract(this.velocity);
+		var steer = Phaser.Point.subtract(desired, this.velocity);
 		
-		steer.limit(MAX_FORCE)
+		// limit custom function
+		steer.limit(MAX_FORCE);
 	}
 	else{
 	
@@ -89,11 +133,52 @@ Fish.prototype.steer_to = function(target) {
 	
 }
 
-Fish.prototype.align = function (){
+Fish.prototype.align = function (neighbours){
 
+	var mean = new Phaser.Point();
+	var count = 0;
+
+	for (var x in banc.children){
+		
+		var distance = Phaser.Point.distance(this.body.position, banc.children[x].body.position);
+
+		if (distance > 0 && distance < NEIGHBOUR_RADIUS){
+		
+			mean = Phaser.Point.add(mean, banc.children[x]);
+			count++;
+		}		
+	}
+
+	if (count > 0){
+		mean = new Phaser.Point(mean.x / count, mean.y / count);
+	}
+
+	mean.limit(MAX_FORCE);
+	return mean;
 }
 
-Fish.prototype.seperate = function (){
+Fish.prototype.separate = function (neighbours){
+
+	var mean = new Phaser.Point();
+	var count = 0;
+
+	for (var x in banc.children){
+		
+		var distance = Phaser.Point.distance(this.body.position, banc.children[x].body.position);
+
+		if (distance > 0 && distance < DESIRED_SEPARATION){
+
+			// A revoir
+			mean = Phaser.Point.add(mean, Phaser.Point.subtract(this.body.position, banc.children[x].body.position).normalize().divide(distance, distance));
+			count++;
+		}		
+	}
+
+	if (count > 0){
+		mean = new Phaser.Point(mean.x / count, mean.y / count);
+	}
+
+	return mean;
 
 }
 
@@ -119,8 +204,7 @@ function create() {
 function update(){
 
 	for (var x in banc.children){
-		banc.children[x].move();
-		banc.children[x].cohere();
+		banc.children[x].step(banc);
 	}
 
 }
