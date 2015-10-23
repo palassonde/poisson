@@ -9,7 +9,7 @@ var banc;
 
 //Constantes a parametriser
 var NEIGHBOUR_RADIUS = 150;
-var MAX_SPEED = 5;
+var MAX_SPEED = 3;
 var MAX_FORCE = 10;
 var DESIRED_SEPARATION = 100;
 var SEPARATION_WEIGHT = 10;
@@ -29,8 +29,20 @@ Phaser.Point.prototype.limit = function(MAX) {
 
 // Constructeur de l'objet fish
 var Fish = function(x, y) {
+	console.log(x);
+	if(x > 300){
+		Phaser.Sprite.call(this, game, x, y, 'fish');
+		this.animations.add('droite', [0,1,2,3,4], 5, true);
+		this.animations.add('gauche', [6,7], 5, true);
 
-	Phaser.Sprite.call(this, game, x, y, 'fish');
+		this.scale.setTo(0.15,0.15);
+	}else {
+		Phaser.Sprite.call(this, game, x, y, 'fish2');
+		this.animations.add('droite', [0,1,2,3,4,5,6], 5, true);
+		//this.animations.add('gauche', [7,8,9,10,11,12], 5, true);
+		this.scale.setTo(0.4,0.4);
+		
+	}
 
 	// Vitesse de depart
 	this.velocity = new Phaser.Point();//Math.random()*2-1, Math.random()*2-1);
@@ -41,10 +53,9 @@ var Fish = function(x, y) {
 	this.game.physics.arcade.enableBody(this);
 
 	// Animations
-	this.animations.add('droite', [0,1,2,3,4], 5, true);
-	this.animations.add('gauche', [6,7], 5, true);
+	
 	this.animations.play('droite');
-	this.scale.setTo(0.15,0.15);
+	//this.scale.setTo(0.15,0.15);
 
 };
 
@@ -211,6 +222,7 @@ Fish.prototype.checkBorders = function() {
 function preload() {
 
     game.load.spritesheet('fish', 'assets/poisse.png', 300, 200);
+	game.load.spritesheet('fish2', 'assets/poisson3.png', 122, 70);
  }
  
 function create() {
@@ -219,7 +231,7 @@ function create() {
 	
 	banc = game.add.group();
 
-	for(var i = 0; i < 30; i++) {
+	for(var i = 0; i < 20; i++) {
         banc.add(new Fish(Math.random()*500, Math.random()*500, banc));
         //banc.add(new Fish(300,300));
     }
@@ -232,9 +244,9 @@ function update(){
 
 	for (var x in banc.children){
 		banc.children[x].step(banc);
-		if (banc.children[x].velocity.x < 0)
-			banc.children[x].animations.play('gauche');
-		else
+		//if (banc.children[x].velocity.x < 0)
+			//banc.children[x].animations.play('gauche');
+		//else
 			banc.children[x].animations.play('droite');
 	}
 
