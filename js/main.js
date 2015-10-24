@@ -262,13 +262,31 @@ Fish.prototype.checkBorders = function(count, mean) {
 
 function preload() {
 
-    game.load.spritesheet('fish', 'assets/poisse.png', 300, 200);
-	game.load.spritesheet('fish2', 'assets/poisson3.png', 122, 70);
+    this.game.load.image('background', 'assets/background.png');
+    this.game.load.spritesheet('fish', 'assets/poisse.png', 300, 200);
+	this.game.load.spritesheet('fish2', 'assets/poisson3.png', 122, 70);
+	this.game.load.image('obstacle1', 'assets/obstacle1.png');
+	this.game.load.image('obstacle2', 'assets/obstacle2.png');
+	this.game.load.image('obstacle3', 'assets/obstacle3.png');
  }
  
 function create() {
 
-	game.stage.backgroundColor = "#0099FF";
+	// création de l'arrière-plan
+		game.add.tileSprite(0, 0, 1024, 600, 'background');
+		
+		// creation obstacle
+		game.add.sprite(770, 440, 'obstacle1');
+		game.add.sprite(315, 455, 'obstacle2');
+		
+		
+		// bouger obstacle3
+		sprite = game.add.sprite(500, 300, 'obstacle3');
+		sprite.anchor.set(0.5);
+		sprite.smoothed = true;
+		game.physics.enable(sprite, Phaser.Physics.ARCADE);
+		sprite.body.immovable = true;
+		game.add.tween(sprite.scale).to( { x: 1.25, y: 1.25 }, 1500, Phaser.Easing.Linear.None, true, 0, 1000, true);
 	
 	banc = game.add.group();
 
