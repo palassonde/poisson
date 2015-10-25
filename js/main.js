@@ -6,14 +6,14 @@ var game = new Phaser.Game(1024, 600, Phaser.AUTO, 'game', {preload: preload, cr
 
 // Groupe de poissons
 var banc;
-var fishNumber = 10;
+var fishNumber = 20;
 var nemo;
 
 //Constantes a parametriser
-var NEIGHBOUR_RADIUS = 120;
-var MAX_SPEED = 1;
-var MAX_FORCE = 10;
-var DESIRED_SEPARATION = 100;
+var NEIGHBOUR_RADIUS = 200;
+var MAX_SPEED = 2.5;
+var MAX_FORCE = 0.1;
+var DESIRED_SEPARATION = 50;
 //var SEPARATION_WEIGHT = 10;
 //var ALIGNMENT_WEIGHT = 10;
 //var COHESION_WEIGHT = 10;
@@ -49,7 +49,7 @@ var Fish = function(x, y) {
 	this.specimen = "";
 
 	// Vitesse de depart
-	this.velocity = new Phaser.Point();//Math.random()*2-1, Math.random()*2-1);
+	this.velocity = new Phaser.Point(-Math.random()*2-1, -Math.random()*2-1);
 	
 
 	// Relier a lobjet sprite de phaser
@@ -79,11 +79,19 @@ Fish.prototype.step = function (neighbours){
 // Algo principale qui agrege toutes les fonctions du comportement
 Fish.prototype.flock = function (neighbours){
 
+	this.body.acceleration.setTo(0,0);
+
 	var separation = this.separate(neighbours);//.multiply(10000,10000);
 	var alignment = this.align(neighbours);//.multiply(10000,10000);
 	var cohesion = this.cohere(neighbours);//.multiply(10000,10000);
+	var dodge = this.checkObstacles();
 
-	return Phaser.Point.add(Phaser.Point.add(separation, alignment), cohesion);
+	this.rotation = Math.atan2(this.velocity.y, this.velocity.x);
+	/*if (this.angle > 20){
+		this.angle = 20;
+	}*/
+
+	return separation.add(alignment.x, alignment.y).add(cohesion.x, cohesion.y).add(dodge.x, dodge.y);
 
 }
 
@@ -189,8 +197,6 @@ Fish.prototype.separate = function (neighbours){
 		}
 	}
 
-	mean = this.checkBorders(count, mean);
-
   	if(mean.getMagnitude() > 0) {
 	    mean.normalize();
 	    mean.multiply(MAX_SPEED, MAX_SPEED);
@@ -202,59 +208,11 @@ Fish.prototype.separate = function (neighbours){
 }
 
 
-Fish.prototype.checkBorders = function(count, mean) {
+Fish.prototype.checkObstacles = function() {
+
+	var mean = new Phaser.Point(0,0);
 
 	
-
-	var diff = Phaser.Point();
-
-
-
-	var distanceMurDroite = Phaser.Point.distance(this.body.position, new Phaser.Point(game.width, this.body.y));
-
-	var distanceMurGauche = Phaser.Point.distance(this.body.position, new Phaser.Point(0, this.body.y));
-	var distanceMurHaut = Phaser.Point.distance(this.body.position, new Phaser.Point(this.body.x, 0));
-	var distanceMurBas= Phaser.Point.distance(this.body.position, new Phaser.Point(this.body.x , game.height));
-
-	if (distanceMurDroite < DESIRED_SEPARATION){
-
-			diff = Phaser.Point.subtract(this.body.position, new Phaser.Point(game.width, this.body.y));
-			diff.normalize();
-			diff.divide(distanceMurDroite, distanceMurDroite);
-			mean.add(diff.x, diff.y);
-			count++;
-	}
-
-	if (distanceMurGauche < DESIRED_SEPARATION){
-
-			diff = Phaser.Point.subtract(this.body.position, new Phaser.Point(0, this.body.y));
-			diff.normalize();
-			diff.divide(distanceMurGauche, distanceMurGauche);
-			mean.add(diff.x, diff.y);
-			count++;
-	}
-
-	if (distanceMurHaut < DESIRED_SEPARATION){
-
-			diff = Phaser.Point.subtract(this.body.position, new Phaser.Point(this.body.x, 0));
-			diff.normalize();
-			diff.divide(distanceMurHaut, distanceMurHaut);
-			mean.add(diff.x, diff.y);
-			count++;
-	}
-
-	if (distanceMurBas < DESIRED_SEPARATION){
-
-			diff = Phaser.Point.subtract(this.body.position, new Phaser.Point(this.body.x , game.height));
-			diff.normalize();
-			diff.divide(distanceMurBas, distanceMurBas);
-			mean.add(diff.x, diff.y);
-			count++;
-	}
-
-	if (count > 0){
-		mean.divide(count, count);
-	}
 
   	return mean;
 }
@@ -291,11 +249,8 @@ function create() {
 	banc = game.add.group();
 
 	for(var i = 0; i < fishNumber; i++) {
-			banc.add(new Fish(i - 100 + game.width /2, i + game.height / 2));
+		banc.add(new Fish(Math.random() * game.width, Math.random() * game.height));
     }
-
-    //banc.add(new Fish(100, 100));
-    nemo = banc.add(new Fish(50, 50));
    
 
 }
@@ -304,18 +259,13 @@ function update(){
 
 	for (var x in banc.children){
 		banc.children[x].step(banc);
-		//if (banc.children[x].velocity.x < 0)
-			//banc.children[x].animations.play('gauche');
-		//else
-			banc.children[x].animations.play('droite');
 	}
-
 }
 
 function render () {
 
      // debug helper
-     game.debug.bodyInfo(nemo, 16, 24);
+     //game.debug.bodyInfo(nemo, 16, 24);
 }
 
 
