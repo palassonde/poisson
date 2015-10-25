@@ -221,6 +221,8 @@ Fish.prototype.checkObstacles = function() {
 
 function preload() {
 
+	this.game.load.image('wall', 'assets/wall.png');
+	this.game.load.image('wall2', 'assets/wall2.png');
     this.game.load.image('background', 'assets/background.png');
     this.game.load.spritesheet('fish', 'assets/poisse.png', 300, 200);
 	this.game.load.spritesheet('fish2', 'assets/poisson3.png', 122, 70);
@@ -233,13 +235,21 @@ function create() {
 
 	// création de l'arrière-plan
 		game.add.tileSprite(0, 0, 1024, 600, 'background');
-		
-		// creation obstacle
+	
+	// création de l'arrière-plan
+		game.add.tileSprite(0, 0, 1024, 600, 'background');
+	
+	// creation mur
+		game.add.sprite(0, 0, 'wall');
+		game.add.sprite(0, 585, 'wall');
+		game.add.sprite(0, 0, 'wall2');
+		game.add.sprite(1007,0, 'wall2');
+	// creation obstacle
 		game.add.sprite(770, 440, 'obstacle1');
 		game.add.sprite(315, 455, 'obstacle2');
 		
 		
-		// bouger obstacle3
+	// bouger obstacle3
 		sprite = game.add.sprite(500, 300, 'obstacle3');
 		sprite.anchor.set(0.5);
 		sprite.smoothed = true;
