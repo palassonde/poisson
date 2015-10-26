@@ -12,7 +12,7 @@ var fishNumber = 30;
 var NEIGHBOUR_RADIUS = 150;
 var MAX_SPEED = 2.5;
 var MAX_FORCE = 0.1;
-var DESIRED_SEPARATION = 70;
+var DESIRED_SEPARATION = 50;
 
 // Fonction limitatrice ajouter a lobjet Phaser.Point
 Phaser.Point.prototype.limit = function(MAX) {
@@ -83,9 +83,9 @@ Fish.prototype.flock = function (neighbours){
 	var dodge = this.checkObstacles();
 
 	this.rotation = Math.atan2(this.velocity.y, this.velocity.x);
-	/*if (this.angle > 20){
+	if (this.angle > 20){
 		this.angle = 20;
-	}*/
+	}
 
 	return separation.add(alignment.x, alignment.y).add(cohesion.x, cohesion.y).add(dodge.x, dodge.y);
 
