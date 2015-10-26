@@ -51,11 +51,48 @@ public class Server {
 				try {
 
 					InputStream f = new FileInputStream(filename);
+					
+					String[] filetype = filename.split("\\.");
 
-					out.println("HTTP/1.0 200 OK");
-					out.println("Content-Type: text/html");
-					out.println("");
+					if (filetype.length > 0){
 
+						switch (filetype[1]) {
+
+							case "html":
+								out.println("HTTP/1.0 200 OK");
+								out.println("Content-Type: text/html");
+								out.println("");
+								break;
+							case "css":
+								out.println("HTTP/1.0 200 OK");
+								out.println("Content-Type: text/css");
+								out.println("");
+								break;
+							case "png":
+								out.println("HTTP/1.0 200 OK");
+								out.println("Content-Type: image/png");
+								out.println("");
+								break;
+							case "ico":
+								out.println("HTTP/1.0 200 OK");
+								out.println("Content-Type: image/x-icon");
+								out.println("");
+								break;
+							default:
+								out.println("HTTP/1.0 200 OK");
+								out.println("Content-Type: text/html");
+								out.println("");
+								break;
+						}
+
+					}
+					else {
+
+						out.println("HTTP/1.0 200 OK");
+						out.println("Content-Type: text/html");
+						out.println("");
+					}
+					
 					byte[] a=new byte[4096];
 					int n;
 					while ((n=f.read(a))>0)
