@@ -15,7 +15,7 @@ var boutonDebug;
 
 //Constantes a parametriser
 var NEIGHBOUR_RADIUS = 150;
-var MAX_SPEED = 2.5;
+var MAX_SPEED = 0.5;
 var MAX_FORCE = 0.1;
 var DESIRED_SEPARATION = 50;
 
@@ -47,23 +47,20 @@ var Fish = function(x, y, graphics) {
 		
 	}
 
-	this.pointText = game.add.text(0,0, "Tmp",{font: "12px Arial", fill: "#ffffff"});
+	this.pointText = game.add.text(0,0, "",{font: "12px Arial", fill: "#ffffff"});
 	this.pointText.visible = false;
 	
 	//Permet de savoir quel poisson est en debug
 	this.isDebug = false;
 	//Permet de créer le cercle
 	this.graphics = graphics;
-
-	//Si on clique sur un poisson
-	//this.inputEnabled = true; 
-	this.events.onInputDown.add(this.clickFish, this);
-
 	this.specimen = "";
 
 	// Vitesse de depart
 	this.velocity = new Phaser.Point();
-	
+
+	//Si on clique sur un poisson
+	this.events.onInputDown.add(this.clickFish, this);
 
 	// Relier a lobjet sprite de phaser
 	this.anchor.setTo(0.5, 0.5);
@@ -112,14 +109,11 @@ Fish.prototype.drawCircle = function (){
 	this.graphics.lineStyle(2, 0xd300cc, 1);
     this.graphics.drawCircle(this.body.x + ((this.body.width)/2), this.body.y + ((this.body.height)/2), 500);
 	
-	console.log(this.pointText);
-	
 	this.pointText.x = this.body.x;
 	this.pointText.y = this.body.y;
-	this.pointText.text = "(" + this.body.x + "," + this.body.y + ")";
-	this.pointText.text = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+	this.pointText.text = "(" + this.body.x.toFixed(0) + "," + this.body.y.toFixed(0) + ")";
+
 	this.pointText.visible = true;
-	console.log(this.pointText);
 	
 
 }
@@ -153,11 +147,22 @@ function afficherInformation (bool){
 
 // Premiere fonction du mouvement des poissons
 Fish.prototype.step = function (neighbours){
+	
+	
 
 	acceleration = this.flock(neighbours);
+	
+	//console.log(this.velocity);
+	
 
 	this.velocity = Phaser.Point.add(this.velocity, acceleration).limit(MAX_SPEED);
 	this.body.position.add(this.velocity.x, this.velocity.y);
+	
+	if(this.isDebug && debug){
+		this.graphics.position.add(this.velocity.x, this.velocity.y); 
+		this.pointText.position.add(this.velocity.x, this.velocity.y); 
+		this.pointText.text = "(" + this.pointText.x.toFixed(0) + "," + this.pointText.y.toFixed(0) + ")";
+	 }
 }
 
 // Algo principale qui agrege toutes les fonctions du comportement
@@ -186,33 +191,37 @@ Fish.prototype.cohere = function (neighbours){
 	var count = 0;
 
 	for (var x in neighbours.children){
-		
+
 		var d = Phaser.Point.distance(this.body.position, neighbours.children[x].body.position);
 
 		if (d > 0 && d < NEIGHBOUR_RADIUS){
+			
 
 			//Si un poisson en Debug et le debug est actif
 			if(this.isDebug && debug){
-				this.pointText.x = neighbours.children[x].body.x;
-				this.pointText.y = neighbours.children[x].body.y;
-				this.pointText.text = "(" + neighbours.children[x].body.x + "," + neighbours.children[x].body.y + ")";
-				this.pointText.visible = true;
+				neighbours.children[x].pointText.x = neighbours.children[x].body.x;
+				neighbours.children[x].pointText.y = neighbours.children[x].body.y;
+				neighbours.children[x].pointText.text = "(" + neighbours.children[x].body.x.toFixed(0) + "," + neighbours.children[x].body.y.toFixed(0) + ")";
+				neighbours.children[x].pointText.visible = true;
 			}
-		
+			
+
 			sum.add(neighbours.children[x].body.x, neighbours.children[x].body.y);
 			count++;
-		} else {
+		}else{
 
 			//Assure d'Afficher seulement ceux qui sont dans le rayon
-			if(this.isDebug && debug){
+			if(this.isDebug && debug && d !==0){
 				neighbours.children[x].pointText.visible = false;
 			}
 		}		
 	}
 
 	if (count > 0){
-				
+			
+
 		var target = sum.divide(count, count);
+		
 		return this.steer_to(target);
 	}
 	else {
