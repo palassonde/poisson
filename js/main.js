@@ -8,6 +8,11 @@ var game = new Phaser.Game(1024, 600, Phaser.AUTO, 'game', {preload: preload, cr
 var banc;
 var fishNumber = 30;
 
+// Mode debug
+var debug = false;
+var text;
+var boutonDebug;
+
 //Constantes a parametriser
 var NEIGHBOUR_RADIUS = 150;
 var MAX_SPEED = 2.5;
@@ -26,7 +31,7 @@ Phaser.Point.prototype.limit = function(MAX) {
 }
 
 // Constructeur de l'objet fish
-var Fish = function(x, y) {
+var Fish = function(x, y, graphics) {
 
 	if(x > game.width / 2){
 		Phaser.Sprite.call(this, game, x, y, 'fish');
@@ -41,6 +46,18 @@ var Fish = function(x, y) {
 		this.scale.setTo(0.4,0.4);
 		
 	}
+
+	this.pointText = game.add.text(0,0, "Tmp",{font: "12px Arial", fill: "#ffffff"});
+	this.pointText.visible = false;
+	
+	//Permet de savoir quel poisson est en debug
+	this.isDebug = false;
+	//Permet de créer le cercle
+	this.graphics = graphics;
+
+	//Si on clique sur un poisson
+	//this.inputEnabled = true; 
+	this.events.onInputDown.add(this.clickFish, this);
 
 	this.specimen = "";
 
@@ -63,6 +80,77 @@ var Fish = function(x, y) {
 Fish.prototype = Object.create(Phaser.Sprite.prototype);
 Fish.prototype.constructor = Fish;
 
+// Function sur un clic dur un poisson
+Fish.prototype.clickFish = function (){
+	
+	//Efface tout les dessins
+	this.effaceInfo();
+	
+	//Si c'est PAS le même poission 
+	if(!this.isDebug && debug){
+		//Met tout les possion sans debug
+		banc.setAll('isDebug', false);
+		this.drawCircle();		
+	} 
+
+	this.isDebug = !this.isDebug;
+}
+
+// Function sur un clic dur un poisson
+Fish.prototype.drawCircle = function (){
+  
+	//Cercle de séparation
+	this.graphics.lineStyle(2, 0xffd900, 1);
+    this.graphics.drawCircle(this.body.x + ((this.body.width)/2), this.body.y + ((this.body.height)/2), DESIRED_SEPARATION * 2);
+	
+	//Cercle d'alignement
+	this.graphics.lineStyle(2, 0x3fd300, 1);
+    this.graphics.drawCircle(this.body.x + ((this.body.width)/2), this.body.y + ((this.body.height)/2), NEIGHBOUR_RADIUS*2);
+	
+	
+	//Cercle de cohesion
+	this.graphics.lineStyle(2, 0xd300cc, 1);
+    this.graphics.drawCircle(this.body.x + ((this.body.width)/2), this.body.y + ((this.body.height)/2), 500);
+	
+	console.log(this.pointText);
+	
+	this.pointText.x = this.body.x;
+	this.pointText.y = this.body.y;
+	this.pointText.text = "(" + this.body.x + "," + this.body.y + ")";
+	this.pointText.text = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+	this.pointText.visible = true;
+	console.log(this.pointText);
+	
+
+}
+
+Fish.prototype.effaceInfo = function (){
+	
+	//Efface tout les cercles
+	this.graphics.clear();
+	this.graphics.position = new Phaser.Point();
+	
+	//Efface tous les point
+	banc.setAll('pointText.visible', false);
+	
+}
+
+//Affiche ou efface les info. suplémentaire si on clique sur 'D'
+function afficherInformation (bool){
+
+	//Si le mode Debug est activé (on regard si il n'avait pas un poisson en mode debug)
+	if(bool){
+		for (var x in banc.children){
+			if(banc.children[x].isDebug){
+				banc.children[x].drawCircle();
+			}
+		}
+	}else {
+		banc.children[0].effaceInfo();
+	}
+	
+}
+
 // Premiere fonction du mouvement des poissons
 Fish.prototype.step = function (neighbours){
 
@@ -83,9 +171,9 @@ Fish.prototype.flock = function (neighbours){
 	var dodge = this.checkObstacles();
 
 	this.rotation = Math.atan2(this.velocity.y, this.velocity.x);
-	if (this.angle > 20){
+/*	if (this.angle > 20){
 		this.angle = 20;
-	}
+	}*/
 
 	return separation.add(alignment.x, alignment.y).add(cohesion.x, cohesion.y).add(dodge.x, dodge.y);
 
@@ -102,9 +190,23 @@ Fish.prototype.cohere = function (neighbours){
 		var d = Phaser.Point.distance(this.body.position, neighbours.children[x].body.position);
 
 		if (d > 0 && d < NEIGHBOUR_RADIUS){
+
+			//Si un poisson en Debug et le debug est actif
+			if(this.isDebug && debug){
+				this.pointText.x = neighbours.children[x].body.x;
+				this.pointText.y = neighbours.children[x].body.y;
+				this.pointText.text = "(" + neighbours.children[x].body.x + "," + neighbours.children[x].body.y + ")";
+				this.pointText.visible = true;
+			}
 		
 			sum.add(neighbours.children[x].body.x, neighbours.children[x].body.y);
 			count++;
+		} else {
+
+			//Assure d'Afficher seulement ceux qui sont dans le rayon
+			if(this.isDebug && debug){
+				neighbours.children[x].pointText.visible = false;
+			}
 		}		
 	}
 
@@ -248,7 +350,6 @@ function create() {
 		game.add.sprite(770, 440, 'obstacle1');
 		game.add.sprite(315, 455, 'obstacle2');
 		
-		
 	// bouger obstacle3
 		sprite = game.add.sprite(500, 300, 'obstacle3');
 		sprite.anchor.set(0.5);
@@ -259,11 +360,41 @@ function create() {
 	
 	banc = game.add.group();
 
+	//active ou desactive le mode Debug
+		this.actionKey = this.game.input.keyboard.addKey(Phaser.Keyboard.D);
+		this.actionKey.onDown.add(debugText, this);
+
+		//Dessin du cercle
+		var graphics = game.add.graphics(0, 0);
+		
+		var style = {font: "12px Arial", fill: "#ffffff"};
+		text = this.add.text(0,0, "Debug activé", style);
+		text.visible = false;
+		
+		var style2 = {font: "12px Arial", fill: "#ffffff"};
+		boutonDebug = this.add.text(0,0, "Appuyer sur D pour activer le mode debug", style2);
+		boutonDebug.visible = true;
+
+		// creer les poissons sur la scene
+
 	for(var i = 0; i < fishNumber; i++) {
-		banc.add(new Fish(Math.random() * game.width, Math.random() * game.height));
+		banc.add(new Fish(Math.random() * game.width, Math.random() * game.height, graphics));
     }
+
+    banc.setAll('inputEnabled', debug);
    
 
+}
+
+function debugText (){
+	debug = !debug;
+	text.visible = debug;
+	boutonDebug.visible = !debug;
+	banc.setAll('inputEnabled', debug);
+	
+	
+	afficherInformation(debug);
+	//Fish.inputEnabled = true;
 }
 
 function update(){
