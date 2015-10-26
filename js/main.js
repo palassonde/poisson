@@ -19,6 +19,10 @@ var MAX_SPEED = 0.5;
 var MAX_FORCE = 0.1;
 var DESIRED_SEPARATION = 50;
 
+var COLOR_COHERE = 0xd300cc;
+var COLOR_SEPARATION = 0xffd900;
+var COLOR_ALIGN = 0x3fd300;
+
 // Fonction limitatrice ajouter a lobjet Phaser.Point
 Phaser.Point.prototype.limit = function(MAX) {
 
@@ -31,7 +35,7 @@ Phaser.Point.prototype.limit = function(MAX) {
 }
 
 // Constructeur de l'objet fish
-var Fish = function(x, y, graphics) {
+var Fish = function(x, y, graphics,fleche) {
 
 	if(x > game.width / 2){
 		Phaser.Sprite.call(this, game, x, y, 'fish');
@@ -54,6 +58,33 @@ var Fish = function(x, y, graphics) {
 	this.isDebug = false;
 	//Permet de créer le cercle
 	this.graphics = graphics;
+	
+	//Créer une pointe pour la cohesion
+	createFleche(fleche,COLOR_COHERE);
+	this.pointeCohere = game.add.sprite(0, 0, fleche.generateTexture());
+    this.pointeCohere.anchor.y = 0.5;
+	this.pointeCohere.visible = false;
+	fleche.clear();
+	
+	//Créer un vecteur de direction (align)
+	createFleche(fleche,COLOR_ALIGN);
+	this.vecteurAlign = game.add.sprite(0, 0, fleche.generateTexture());
+	console.log(this.vecteurAlign);
+	this.vecteurAlign.anchor.y = 0.5;
+	//this.vecteurAlign.anchor.set(0.5);
+	this.vecteurAlign.visible = false;
+	fleche.clear();
+	
+	//Créer un vecteur de direction (separation)
+	createFleche(fleche,COLOR_SEPARATION);
+	this.vecteurSeparation = game.add.sprite(0, 0, fleche.generateTexture());
+	this.vecteurSeparation.anchor.y = 0.5;
+	this.vecteurSeparation.visible = false;
+	fleche.clear();
+	
+	//Permet de créer une droite
+	//this.fleche = fleche;
+	
 	this.specimen = "";
 
 	// Vitesse de depart
@@ -97,16 +128,16 @@ Fish.prototype.clickFish = function (){
 Fish.prototype.drawCircle = function (){
   
 	//Cercle de séparation
-	this.graphics.lineStyle(2, 0xffd900, 1);
+	this.graphics.beginFill(COLOR_SEPARATION, 0.5);
     this.graphics.drawCircle(this.body.x + ((this.body.width)/2), this.body.y + ((this.body.height)/2), DESIRED_SEPARATION * 2);
 	
 	//Cercle d'alignement
-	this.graphics.lineStyle(2, 0x3fd300, 1);
+	this.graphics.beginFill(COLOR_ALIGN, 0.5);
     this.graphics.drawCircle(this.body.x + ((this.body.width)/2), this.body.y + ((this.body.height)/2), NEIGHBOUR_RADIUS*2);
 	
 	
 	//Cercle de cohesion
-	this.graphics.lineStyle(2, 0xd300cc, 1);
+	this.graphics.beginFill(COLOR_COHERE, 0.5);
     this.graphics.drawCircle(this.body.x + ((this.body.width)/2), this.body.y + ((this.body.height)/2), 500);
 	
 	this.pointText.x = this.body.x;
@@ -126,6 +157,10 @@ Fish.prototype.effaceInfo = function (){
 	
 	//Efface tous les point
 	banc.setAll('pointText.visible', false);
+	banc.setAll('vecteurAlign.visible', false);
+	banc.setAll('vecteurSeparation.visible',false);
+	banc.setAll('pointeCohere.visible',false);
+	
 	
 }
 
@@ -148,13 +183,11 @@ function afficherInformation (bool){
 // Premiere fonction du mouvement des poissons
 Fish.prototype.step = function (neighbours){
 	
-	
-
+	if(this.isDebug, debug){
+		//this.graphics.clear();
+	}
 	acceleration = this.flock(neighbours);
 	
-	//console.log(this.velocity);
-	
-
 	this.velocity = Phaser.Point.add(this.velocity, acceleration).limit(MAX_SPEED);
 	this.body.position.add(this.velocity.x, this.velocity.y);
 	
@@ -176,6 +209,8 @@ Fish.prototype.flock = function (neighbours){
 	var dodge = this.checkObstacles();
 
 	this.rotation = Math.atan2(this.velocity.y, this.velocity.x);
+	
+		//sprite.rotation = this.rotation;
 /*	if (this.angle > 20){
 		this.angle = 20;
 	}*/
@@ -221,6 +256,13 @@ Fish.prototype.cohere = function (neighbours){
 			
 
 		var target = sum.divide(count, count);
+		
+		if(this.isDebug && debug){
+			this.pointeCohere.x = this.body.x + ((this.body.width)/2);
+			this.pointeCohere.y = this.body.y + ((this.body.height)/2);
+			this.pointeCohere.rotation = Math.atan2(target.y - this.pointeCohere.y, target.x - this.pointeCohere.x);			
+			this.pointeCohere.visible = true;
+		}
 		
 		return this.steer_to(target);
 	}
@@ -268,13 +310,24 @@ Fish.prototype.align = function (neighbours){
 	var count = 0;
 
 	for (var x in neighbours.children){
-		
-		var distance = Phaser.Point.distance(this.body.position, neighbours.children[x].body.position);
+		var voisin = neighbours.children[x];
+		var distance = Phaser.Point.distance(this.body.position, voisin.body.position);
 
 		if (distance > 0 && distance < NEIGHBOUR_RADIUS){
-		
-			mean.add(neighbours.children[x].velocity.x, neighbours.children[x].velocity.y);
+			
+			if(this.isDebug && debug){	
+				voisin.vecteurAlign.x = voisin.body.x + ((voisin.body.width)/2);
+				voisin.vecteurAlign.y = voisin.body.y + ((voisin.body.height)/2);
+				voisin.vecteurAlign.rotation = Math.atan2(voisin.velocity.y, voisin.velocity.x);			
+				voisin.vecteurAlign.visible = true;
+			}
+			
+			mean.add(voisin.velocity.x, voisin.velocity.y);
 			count++;
+		}else{
+			if(this.isDebug && debug){					
+				voisin.vecteurAlign.visible = false;
+			}
 		}		
 	}
 
@@ -282,6 +335,14 @@ Fish.prototype.align = function (neighbours){
 
 		mean.divide(count, count);
 		mean.normalize();
+		
+		if(this.isDebug && debug){	
+			this.vecteurAlign.x = this.body.x + ((this.body.width)/2);
+			this.vecteurAlign.y = this.body.y + ((this.body.height)/2);
+			this.vecteurAlign.rotation = Math.atan2(mean.y, mean.x);		
+			this.vecteurAlign.visible = true;
+		}
+		
 		mean.multiply(MAX_SPEED, MAX_SPEED);
 		steer = Phaser.Point.subtract(mean, this.velocity);
 		steer.limit(MAX_FORCE);
@@ -311,10 +372,22 @@ Fish.prototype.separate = function (neighbours){
 
   	if(mean.getMagnitude() > 0) {
 	    mean.normalize();
+		
+		if(this.isDebug && debug){	
+			this.vecteurSeparation.x = this.body.x + ((this.body.width)/2);
+			this.vecteurSeparation.y = this.body.y + ((this.body.height)/2);
+			this.vecteurSeparation.rotation = Math.atan2(mean.y, mean.x);		
+			this.vecteurSeparation.visible = true;
+		}
+		
 	    mean.multiply(MAX_SPEED, MAX_SPEED);
 	    mean.subtract(this.body.velocity.x, this.body.velocity.y);
 	    mean.limit(MAX_FORCE);
-  	}
+  	}else{
+		if(this.isDebug && debug){			
+			this.vecteurSeparation.visible = false;
+		}
+	}
 
 	return mean;
 }
@@ -329,6 +402,20 @@ Fish.prototype.checkObstacles = function() {
   	return mean;
 }
 
+//Permet de creer un fleche
+function createFleche(graphic, color){
+		graphic.lineStyle(5, color, 0.7);
+		graphic.beginFill(color, 0.7);
+	
+		graphic.moveTo(0,10);
+		graphic.lineTo(40,10);
+		graphic.lineTo(40,5);
+		graphic.lineTo(50,10);
+		graphic.lineTo(40,15);
+		graphic.lineTo(40,10);
+		//fleche.lineTo(10, 70);
+		graphic.endFill();
+}
 
 function preload() {
 
@@ -342,11 +429,10 @@ function preload() {
 	this.game.load.image('obstacle3', 'assets/obstacle3.png');
  }
  
+ 
+ 
 function create() {
 
-	// création de l'arrière-plan
-		game.add.tileSprite(0, 0, 1024, 600, 'background');
-	
 	// création de l'arrière-plan
 		game.add.tileSprite(0, 0, 1024, 600, 'background');
 	
@@ -367,17 +453,24 @@ function create() {
 		sprite.body.immovable = true;
 		game.add.tween(sprite.scale).to( { x: 1.25, y: 1.25 }, 1500, Phaser.Easing.Linear.None, true, 0, 1000, true);
 	
-	banc = game.add.group();
+		banc = game.add.group();
 
 	//active ou desactive le mode Debug
 		this.actionKey = this.game.input.keyboard.addKey(Phaser.Keyboard.D);
 		this.actionKey.onDown.add(debugText, this);
 
-		//Dessin du cercle
+		//Graphic pour dessiner disque
 		var graphics = game.add.graphics(0, 0);
 		
+		//Graphique pour dessiner fleche/ligne
+		var fleche = game.add.graphics(0, 0);
+
+		
+		//sprite.angle = 20;
+		
+		//Texte pour le mode debug
 		var style = {font: "12px Arial", fill: "#ffffff"};
-		text = this.add.text(0,0, "Debug activé", style);
+		text = this.add.text(0,0, "Debug activé (appuyer sur un poisson)", style);
 		text.visible = false;
 		
 		var style2 = {font: "12px Arial", fill: "#ffffff"};
@@ -387,7 +480,7 @@ function create() {
 		// creer les poissons sur la scene
 
 	for(var i = 0; i < fishNumber; i++) {
-		banc.add(new Fish(Math.random() * game.width, Math.random() * game.height, graphics));
+		banc.add(new Fish(Math.random() * game.width, Math.random() * game.height, graphics,fleche));
     }
 
     banc.setAll('inputEnabled', debug);
