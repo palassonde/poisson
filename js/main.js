@@ -427,6 +427,9 @@ function preload() {
 	this.game.load.image('obstacle1', 'assets/obstacle1.png');
 	this.game.load.image('obstacle2', 'assets/obstacle2.png');
 	this.game.load.image('obstacle3', 'assets/obstacle3.png');
+	this.game.load.image('obstacle4', 'assets/obstacle4.png');
+	this.game.load.image('obstacle5', 'assets/obstacle5.png');
+	this.game.load.image('obstacle6', 'assets/obstacle6.png');
 }
 
 
@@ -434,7 +437,9 @@ function preload() {
 function create() {
 
 	// création de l'arrière-plan
-	game.add.tileSprite(0, 0, 1024, 600, 'background');
+	this.background = this.game.add.tileSprite(0, 0, 1024, 600, 'background');
+	this.background.width = this.game.world.width;
+	this.background.height = this.game.world.height;
 	
 	// creation mur
 	game.add.sprite(0, 0, 'wall');
@@ -444,14 +449,24 @@ function create() {
 	// creation obstacle
 	game.add.sprite(770, 440, 'obstacle1');
 	game.add.sprite(315, 455, 'obstacle2');
+	game.add.sprite(600, 540, 'obstacle6');
 
-	// bouger obstacle3
-	sprite = game.add.sprite(500, 300, 'obstacle3');
-	sprite.anchor.set(0.5);
-	sprite.smoothed = true;
-	game.physics.enable(sprite, Phaser.Physics.ARCADE);
-	sprite.body.immovable = true;
-	game.add.tween(sprite.scale).to( { x: 1.25, y: 1.25 }, 1500, Phaser.Easing.Linear.None, true, 0, 1000, true);
+	/// bouger obstacle3
+		sprite = game.add.sprite(500, 300, 'obstacle3');
+		sprite.anchor.set(0.5);
+		sprite.smoothed = true;
+		game.physics.enable(sprite, Phaser.Physics.ARCADE);
+		sprite.body.immovable = true;
+		game.add.tween(sprite.scale).to( { x: 1.25, y: 1.25 }, 1500, Phaser.Easing.Linear.None, true, 0, 1000, true);
+	//bouger obstacle4
+		var oc = game.add.sprite(150, 50, 'obstacle4');
+		oc.animations.add('swim');
+		oc.animations.play('swim', 30, true);
+		game.add.tween(oc).to({ y: 60 }, 5000, Phaser.Easing.Quadratic.InOut, true, 0, 1000, true);
+	//bouger obstacle5
+		bot = game.add.sprite(700, 140, 'obstacle5');
+		bot.animations.add('bouge');
+		bot.animations.play('bouge', 15, true);
 	
 	banc = game.add.group();
 
@@ -503,6 +518,11 @@ function update(){
 	for (var x in banc.children){
 		banc.children[x].step(banc);
 	}
+	bot.x -= 2;
+    if (bot.x < -bot.width)
+    {
+        bot.x = game.world.width;
+    }
 }
 
 
