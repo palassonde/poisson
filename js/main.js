@@ -6,7 +6,7 @@ var game = new Phaser.Game(1024, 600, Phaser.AUTO, 'game', {preload: preload, cr
 
 // Groupe de poissons
 var banc;
-var fishNumber = 30;
+var fishNumber = 15;
 
 // Mode debug
 var debug = false;
@@ -14,10 +14,10 @@ var text;
 var boutonDebug;
 
 //Constantes a parametriser
-var NEIGHBOUR_RADIUS = 150;
-var MAX_SPEED = 1;
-var MAX_FORCE = 0.1;
-var DESIRED_SEPARATION = 50;
+var NEIGHBOUR_RADIUS = 100;
+var MAX_SPEED = 2;
+var MAX_FORCE = 0.15;
+var DESIRED_SEPARATION = 45;
 
 var COLOR_COHERE = 0xd300cc;
 var COLOR_SEPARATION = 0xffd900;
@@ -187,8 +187,9 @@ Fish.prototype.step = function (neighbours){
 		//this.graphics.clear();
 	}
 	acceleration = this.flock(neighbours);
+	dodge = this.checkObstacles();
 	
-	this.velocity = Phaser.Point.add(this.velocity, acceleration).limit(MAX_SPEED);
+	this.velocity.add(acceleration.x, acceleration.y).add(dodge.x, dodge.y).limit(MAX_SPEED);
 	this.body.position.add(this.velocity.x, this.velocity.y);
 	
 	if(this.isDebug && debug){
@@ -206,7 +207,7 @@ Fish.prototype.flock = function (neighbours){
 	var separation = this.separate(neighbours);//.multiply(10000,10000);
 	var alignment = this.align(neighbours);//.multiply(10000,10000);
 	var cohesion = this.cohere(neighbours);//.multiply(10000,10000);
-	var dodge = this.checkObstacles();
+	
 
 	this.rotation = Math.atan2(this.velocity.y, this.velocity.x);
 	
@@ -215,7 +216,7 @@ Fish.prototype.flock = function (neighbours){
 		this.angle = 20;
 	}*/
 
-	return separation.add(alignment.x, alignment.y).add(cohesion.x, cohesion.y).add(dodge.x, dodge.y);
+	return separation.add(alignment.x, alignment.y).add(cohesion.x, cohesion.y);
 
 }
 
@@ -392,12 +393,48 @@ Fish.prototype.separate = function (neighbours){
 	return mean;
 }
 
-
 Fish.prototype.checkObstacles = function() {
 
 	var mean = new Phaser.Point(0,0);
-
 	
+	var diff = Phaser.Point();
+
+	var distanceMurDroite = Phaser.Point.distance(this.body.position, new Phaser.Point(game.width, this.body.y));
+	var distanceMurGauche = Phaser.Point.distance(this.body.position, new Phaser.Point(0, this.body.y));
+	var distanceMurHaut = Phaser.Point.distance(this.body.position, new Phaser.Point(this.body.x, 0));
+	var distanceMurBas= Phaser.Point.distance(this.body.position, new Phaser.Point(this.body.x , game.height));
+
+	if (distanceMurDroite < DESIRED_SEPARATION){
+
+			diff = Phaser.Point.subtract(this.body.position, new Phaser.Point(game.width, this.body.y));
+			diff.normalize();
+			diff.divide(distanceMurDroite, distanceMurDroite);
+			mean.add(diff.x, diff.y);
+	}
+
+	if (distanceMurGauche < DESIRED_SEPARATION){
+
+			diff = Phaser.Point.subtract(this.body.position, new Phaser.Point(0, this.body.y));
+			diff.normalize();
+			diff.divide(distanceMurGauche, distanceMurGauche);
+			mean.add(diff.x, diff.y);
+	}
+
+	if (distanceMurHaut < DESIRED_SEPARATION){
+
+			diff = Phaser.Point.subtract(this.body.position, new Phaser.Point(this.body.x, 0));
+			diff.normalize();
+			diff.divide(distanceMurHaut, distanceMurHaut);
+			mean.add(diff.x, diff.y);
+	}
+
+	if (distanceMurBas < DESIRED_SEPARATION){
+
+			diff = Phaser.Point.subtract(this.body.position, new Phaser.Point(this.body.x , game.height));
+			diff.normalize();
+			diff.divide(distanceMurBas, distanceMurBas);
+			mean.add(diff.x, diff.y);
+	}
 
 	return mean;
 }
@@ -512,7 +549,6 @@ function debugText (){
 	boutonDebug.visible = !debug;
 	banc.setAll('inputEnabled', debug);
 
-
 	afficherInformation(debug);
 	//Fish.inputEnabled = true;
 }
@@ -522,63 +558,4 @@ function update(){
 	for (var x in banc.children){
 		banc.children[x].step(banc);
 	}
-	bot.x -= 2;
-    if (bot.x < -bot.width)
-    {
-        bot.x = game.world.width;
-    }
 }
-
-
-/*
-var diff = Phaser.Point();
-
-
-
-	var distanceMurDroite = Phaser.Point.distance(this.body.position, new Phaser.Point(game.width, this.body.y));
-
-	var distanceMurGauche = Phaser.Point.distance(this.body.position, new Phaser.Point(0, this.body.y));
-	var distanceMurHaut = Phaser.Point.distance(this.body.position, new Phaser.Point(this.body.x, 0));
-	var distanceMurBas= Phaser.Point.distance(this.body.position, new Phaser.Point(this.body.x , game.height));
-
-	if (distanceMurDroite < DESIRED_SEPARATION){
-
-			diff = Phaser.Point.subtract(this.body.position, new Phaser.Point(game.width, this.body.y));
-			diff.normalize();
-			diff.divide(distanceMurDroite, distanceMurDroite);
-			mean.add(diff.x, diff.y);
-			count++;
-	}
-
-	if (distanceMurGauche < DESIRED_SEPARATION){
-
-			diff = Phaser.Point.subtract(this.body.position, new Phaser.Point(0, this.body.y));
-			diff.normalize();
-			diff.divide(distanceMurGauche, distanceMurGauche);
-			mean.add(diff.x, diff.y);
-			count++;
-	}
-
-	if (distanceMurHaut < DESIRED_SEPARATION){
-
-			diff = Phaser.Point.subtract(this.body.position, new Phaser.Point(this.body.x, 0));
-			diff.normalize();
-			diff.divide(distanceMurHaut, distanceMurHaut);
-			mean.add(diff.x, diff.y);
-			count++;
-	}
-
-	if (distanceMurBas < DESIRED_SEPARATION){
-
-			diff = Phaser.Point.subtract(this.body.position, new Phaser.Point(this.body.x , game.height));
-			diff.normalize();
-			diff.divide(distanceMurBas, distanceMurBas);
-			mean.add(diff.x, diff.y);
-			count++;
-	}
-
-	if (count > 0){
-		mean.divide(count, count);
-	}
-
-  	return mean;*/
