@@ -446,13 +446,17 @@ function create() {
 	game.add.sprite(0, 585, 'wall');
 	game.add.sprite(0, 0, 'wall2');
 	game.add.sprite(1007,0, 'wall2');
+	
+	
+	
+	
 	// creation obstacle
-	game.add.sprite(770, 440, 'obstacle1');
-	game.add.sprite(315, 455, 'obstacle2');
-	game.add.sprite(600, 540, 'obstacle6');
+	game.add.sprite(785, 440, 'obstacle1');
+	game.add.sprite(115, 455, 'obstacle2');
+	game.add.sprite(500, 492, 'obstacle6');
 
-	/// bouger obstacle3
-		sprite = game.add.sprite(500, 300, 'obstacle3');
+	//bouger obstacle3
+		sprite = game.add.sprite(700, 140, 'obstacle3');
 		sprite.anchor.set(0.5);
 		sprite.smoothed = true;
 		game.physics.enable(sprite, Phaser.Physics.ARCADE);
@@ -464,7 +468,7 @@ function create() {
 		oc.animations.play('swim', 30, true);
 		game.add.tween(oc).to({ y: 60 }, 5000, Phaser.Easing.Quadratic.InOut, true, 0, 1000, true);
 	//bouger obstacle5
-		bot = game.add.sprite(700, 140, 'obstacle5');
+		bot = game.add.sprite(700, 340, 'obstacle5');
 		bot.animations.add('bouge');
 		bot.animations.play('bouge', 15, true);
 	
