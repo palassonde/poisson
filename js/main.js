@@ -19,6 +19,7 @@ var NEIGHBOUR_RADIUS = 100;
 var MAX_SPEED = 2;
 var MAX_FORCE = 0.15;
 var DESIRED_SEPARATION = 45;
+var ROTATION_MAX = 20;
 
 var COLOR_COHERE = 0xd300cc;
 var COLOR_SEPARATION = 0xffd900;
@@ -31,7 +32,6 @@ Phaser.Point.prototype.limit = function(MAX) {
 
 		this.setMagnitude(MAX);
 	}
-
 	return this;
 }
 
@@ -41,13 +41,10 @@ var Fish = function(x, y, graphics,fleche) {
 	if(x > game.width / 2){
 		Phaser.Sprite.call(this, game, x, y, 'fish');
 		this.animations.add('droite', [0,1,2,3,4], 5, true);
-		this.animations.add('gauche', [6,7], 5, true);
-
 		this.scale.setTo(0.15,0.15);
 	}else {
 		Phaser.Sprite.call(this, game, x, y, 'fish2');
 		this.animations.add('droite', [0,1,2,3,4,5,6], 5, true);
-		//this.animations.add('gauche', [7,8,9,10,11,12], 5, true);
 		this.scale.setTo(0.4,0.4);
 	}
 
@@ -83,11 +80,6 @@ var Fish = function(x, y, graphics,fleche) {
 	this.vecteurSeparation.visible = false;
 	fleche.clear();
 	
-	//Permet de créer une droite
-	//this.fleche = fleche;
-	
-	this.specimen = "";
-
 	// Vitesse de depart
 	this.velocity = new Phaser.Point();
 
@@ -99,9 +91,7 @@ var Fish = function(x, y, graphics,fleche) {
 	this.game.physics.arcade.enableBody(this);
 
 	// Animations
-	
 	this.animations.play('droite');
-	//this.scale.setTo(0.15,0.15);
 
 };
 
@@ -189,6 +179,30 @@ Fish.prototype.step = function (neighbours){
 	dodge = this.checkObstacles();
 	
 	this.velocity.add(acceleration.x, acceleration.y).add(dodge.x, dodge.y).add(stayin.x, stayin.y).limit(MAX_SPEED);
+	
+	var angle = Math.atan2(this.velocity.y, this.velocity.x);
+	var dif = Math.abs(angle - this.rotation);
+	if(dif > Math.PI){
+		dif = (2 * Math.PI) - dif;
+	}
+	
+	var maxAngle = (Math.PI / 180)*((ROTATION_MAX * game.time.elapsed) / 1000); //Donne l'angle maximal pour x temps.
+	
+	//Si le poisson bouge dans un trop gros angle (rectifier)
+	if(dif > maxAngle){	
+		var magnitude = this.velocity.getMagnitude();
+		//console.log(this.velocity);
+		if(angle > this.rotation){
+			this.velocity.y = Math.sin(this.rotation + maxAngle) * (magnitude);
+			this.velocity.x = Math.cos(this.rotation + maxAngle) * (magnitude);
+		}else{
+			this.velocity.y = Math.sin(this.rotation - maxAngle) * (magnitude);
+			this.velocity.x = Math.cos(this.rotation - maxAngle) * (magnitude);
+		}
+		
+	}
+	
+	this.rotation = Math.atan2(this.velocity.y, this.velocity.x);
 	this.body.position.add(this.velocity.x, this.velocity.y);
 	
 	if(this.isDebug && debug){
@@ -203,20 +217,11 @@ Fish.prototype.flock = function (neighbours){
 
 	this.body.acceleration.setTo(0,0);
 
-	var separation = this.separate(neighbours);//.multiply(10000,10000);
-	var alignment = this.align(neighbours);//.multiply(10000,10000);
-	var cohesion = this.cohere(neighbours);//.multiply(10000,10000);
+	var separation = this.separate(neighbours);
+	var alignment = this.align(neighbours);
+	var cohesion = this.cohere(neighbours);
 	
-
-	this.rotation = Math.atan2(this.velocity.y, this.velocity.x);
-	
-		//sprite.rotation = this.rotation;
-/*	if (this.angle > 20){
-		this.angle = 20;
-	}*/
-
 	return separation.add(alignment.x, alignment.y).add(cohesion.x, cohesion.y);
-
 }
 
 // Algo plus bas niveau qui definit la cohesion
