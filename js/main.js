@@ -4,9 +4,9 @@
 
 var game = new Phaser.Game(1024, 600, Phaser.AUTO, 'game', {preload: preload, create: create, update: update});
 
-// Groupe de poissons
+// Groupes
 var banc;
-var fishNumber = 15;
+var obstacles;
 
 // Mode debug
 var debug = false;
@@ -14,6 +14,7 @@ var text;
 var boutonDebug;
 
 //Constantes a parametriser
+var FISH_NUMBER = 15;
 var NEIGHBOUR_RADIUS = 100;
 var MAX_SPEED = 2;
 var MAX_FORCE = 0.15;
@@ -48,7 +49,6 @@ var Fish = function(x, y, graphics,fleche) {
 		this.animations.add('droite', [0,1,2,3,4,5,6], 5, true);
 		//this.animations.add('gauche', [7,8,9,10,11,12], 5, true);
 		this.scale.setTo(0.4,0.4);
-		
 	}
 
 	this.pointText = game.add.text(0,0, "",{font: "12px Arial", fill: "#ffffff"});
@@ -56,6 +56,7 @@ var Fish = function(x, y, graphics,fleche) {
 	
 	//Permet de savoir quel poisson est en debug
 	this.isDebug = false;
+
 	//Permet de créer le cercle
 	this.graphics = graphics;
 	
@@ -183,13 +184,11 @@ function afficherInformation (bool){
 // Premiere fonction du mouvement des poissons
 Fish.prototype.step = function (neighbours){
 	
-	if(this.isDebug, debug){
-		//this.graphics.clear();
-	}
 	acceleration = this.flock(neighbours);
+	stayin = this.checkMurs();
 	dodge = this.checkObstacles();
 	
-	this.velocity.add(acceleration.x, acceleration.y).add(dodge.x, dodge.y).limit(MAX_SPEED);
+	this.velocity.add(acceleration.x, acceleration.y).add(dodge.x, dodge.y).add(stayin.x, stayin.y).limit(MAX_SPEED);
 	this.body.position.add(this.velocity.x, this.velocity.y);
 	
 	if(this.isDebug && debug){
@@ -277,10 +276,7 @@ Fish.prototype.cohere = function (neighbours){
 Fish.prototype.steer_to = function(target) {
 
 	var desired = Phaser.Point.subtract(target, this.body.position);
-	var d = desired.getMagnitude();
-
-	// Meilelur facon de faire ?
-	//var steer = new Phaser.Point(0,0);
+	var d = desired.getMagnitude();;
 	
 	if (d > 0){
 
@@ -293,7 +289,6 @@ Fish.prototype.steer_to = function(target) {
 
 		var steer = Phaser.Point.subtract(desired, this.velocity);
 		
-		// limit custom function
 		steer.limit(MAX_FORCE);
 	}
 	else{
@@ -390,21 +385,53 @@ Fish.prototype.separate = function (neighbours){
 		}
 	}
 
+	if (count > 1){
+
+		mean.divide(count,count);
+	}
+
 	return mean;
 }
 
 Fish.prototype.checkObstacles = function() {
 
-	var mean = new Phaser.Point(0,0);
-	
+	var mean = new Phaser.Point();
+
+	for (var x in obstacles.children){
+
+		var d = Phaser.Point.distance(this.body.position, obstacles.children[x].body.position);
+
+		if (d > 0 && d < 75){
+
+			var diff = Phaser.Point.subtract(this.body.position, obstacles.children[x].body.position);
+			diff.normalize();
+			diff.divide(d, d);
+			mean.add(diff.x, diff.y);
+		}
+	}
+
+	if(mean.getMagnitude() > 0) {
+		mean.normalize();
+		mean.multiply(MAX_SPEED, MAX_SPEED);
+		mean.subtract(this.body.velocity.x, this.body.velocity.y);
+		mean.limit(MAX_FORCE);
+	}
+
+	return mean;
+
+}
+
+Fish.prototype.checkMurs = function() {
+
+	var mean = new Phaser.Point();
 	var diff = Phaser.Point();
 
-	var distanceMurDroite = Phaser.Point.distance(this.body.position, new Phaser.Point(game.width, this.body.y));
-	var distanceMurGauche = Phaser.Point.distance(this.body.position, new Phaser.Point(0, this.body.y));
-	var distanceMurHaut = Phaser.Point.distance(this.body.position, new Phaser.Point(this.body.x, 0));
-	var distanceMurBas= Phaser.Point.distance(this.body.position, new Phaser.Point(this.body.x , game.height));
+	var distanceMurDroite = Phaser.Point.distance(this.body.position, new Phaser.Point(game.width - 50, this.body.y));
+	var distanceMurGauche = Phaser.Point.distance(this.body.position, new Phaser.Point(50, this.body.y));
+	var distanceMurHaut = Phaser.Point.distance(this.body.position, new Phaser.Point(this.body.x, 50));
+	var distanceMurBas= Phaser.Point.distance(this.body.position, new Phaser.Point(this.body.x , game.height - 50));
 
-	if (distanceMurDroite < DESIRED_SEPARATION){
+	if (distanceMurDroite < 300){
 
 			diff = Phaser.Point.subtract(this.body.position, new Phaser.Point(game.width, this.body.y));
 			diff.normalize();
@@ -412,7 +439,7 @@ Fish.prototype.checkObstacles = function() {
 			mean.add(diff.x, diff.y);
 	}
 
-	if (distanceMurGauche < DESIRED_SEPARATION){
+	if (distanceMurGauche < 300){
 
 			diff = Phaser.Point.subtract(this.body.position, new Phaser.Point(0, this.body.y));
 			diff.normalize();
@@ -420,7 +447,7 @@ Fish.prototype.checkObstacles = function() {
 			mean.add(diff.x, diff.y);
 	}
 
-	if (distanceMurHaut < DESIRED_SEPARATION){
+	if (distanceMurHaut < 300){
 
 			diff = Phaser.Point.subtract(this.body.position, new Phaser.Point(this.body.x, 0));
 			diff.normalize();
@@ -428,7 +455,7 @@ Fish.prototype.checkObstacles = function() {
 			mean.add(diff.x, diff.y);
 	}
 
-	if (distanceMurBas < DESIRED_SEPARATION){
+	if (distanceMurBas < 300){
 
 			diff = Phaser.Point.subtract(this.body.position, new Phaser.Point(this.body.x , game.height));
 			diff.normalize();
@@ -469,47 +496,30 @@ function preload() {
 	this.game.load.image('obstacle6', 'assets/obstacle6.png');
 }
 
-
-
 function create() {
 
 	// création de l'arrière-plan
-	this.background = this.game.add.tileSprite(0, 0, 1024, 600, 'background');
-	this.background.width = this.game.world.width;
-	this.background.height = this.game.world.height;
+	var background = game.add.tileSprite(0, 0, game.width, game.height, 'background');
 	
+	// Creation des groupes 
+	banc = game.add.group();
+	obstacles = game.add.group();
+	obstacles.enableBody = true;
+
 	// creation mur
 	game.add.sprite(0, 0, 'wall');
-	game.add.sprite(0, 585, 'wall');
+	game.add.sprite(0, 580, 'wall');
 	game.add.sprite(0, 0, 'wall2');
 	game.add.sprite(1007,0, 'wall2');
 	
-	
-	
-	
 	// creation obstacle
-	game.add.sprite(785, 440, 'obstacle1');
-	game.add.sprite(115, 455, 'obstacle2');
-	game.add.sprite(500, 492, 'obstacle6');
-
-	//bouger obstacle3
-		sprite = game.add.sprite(700, 140, 'obstacle3');
-		sprite.anchor.set(0.5);
-		sprite.smoothed = true;
-		game.physics.enable(sprite, Phaser.Physics.ARCADE);
-		sprite.body.immovable = true;
-		game.add.tween(sprite.scale).to( { x: 1.25, y: 1.25 }, 1500, Phaser.Easing.Linear.None, true, 0, 1000, true);
-	//bouger obstacle4
-		var oc = game.add.sprite(150, 50, 'obstacle4');
-		oc.animations.add('swim');
-		oc.animations.play('swim', 30, true);
-		game.add.tween(oc).to({ y: 60 }, 5000, Phaser.Easing.Quadratic.InOut, true, 0, 1000, true);
-	//bouger obstacle5
-		bot = game.add.sprite(700, 340, 'obstacle5');
-		bot.animations.add('bouge');
-		bot.animations.play('bouge', 15, true);
-	
-	banc = game.add.group();
+	obstacles.create(785, 440, 'obstacle1');
+	obstacles.create(115, 455, 'obstacle2');
+	obstacles.create(700, 140, 'obstacle3');
+	obstacles.create(150, 50, 'obstacle4');
+	obstacles.create(400, 200, 'obstacle5');
+	obstacles.create(500, 492, 'obstacle6');
+	obstacles.setAll('anchor.set', 0.5);
 
 	//active ou desactive le mode Debug
 	this.actionKey = this.game.input.keyboard.addKey(Phaser.Keyboard.D);
@@ -521,8 +531,6 @@ function create() {
 	//Graphique pour dessiner fleche/ligne
 	var fleche = game.add.graphics(0, 0);
 
-	//sprite.angle = 20;
-	
 	//Texte pour le mode debug
 	var style = {font: "12px Arial", fill: "#ffffff"};
 	text = this.add.text(0,0, "Debug activé (appuyer sur un poisson)", style);
@@ -533,8 +541,7 @@ function create() {
 	boutonDebug.visible = true;
 
 	// creer les poissons sur la scene
-
-	for(var i = 0; i < fishNumber; i++) {
+	for(var i = 0; i < FISH_NUMBER; i++) {
 		banc.add(new Fish(Math.random() * game.width, Math.random() * game.height, graphics,fleche));
 	}
 
@@ -550,7 +557,6 @@ function debugText (){
 	banc.setAll('inputEnabled', debug);
 
 	afficherInformation(debug);
-	//Fish.inputEnabled = true;
 }
 
 function update(){
