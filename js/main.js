@@ -16,9 +16,9 @@ var boutonDebug;
 //Constantes a parametriser
 var FISH_NUMBER = 15;
 var NEIGHBOUR_RADIUS = 100;
-var MAX_SPEED = 2;
-var MAX_FORCE = 0.15;
-var DESIRED_SEPARATION = 45;
+var MAX_SPEED = 3;
+var MAX_FORCE = 0.3;
+var DESIRED_SEPARATION = 50;
 
 var COLOR_COHERE = 0xd300cc;
 var COLOR_SEPARATION = 0xffd900;
