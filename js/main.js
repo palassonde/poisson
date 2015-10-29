@@ -14,15 +14,19 @@ var text;
 var boutonDebug;
 
 //Constantes a parametriser
-var FISH_NUMBER = 15;
-var NEIGHBOUR_RADIUS = 100;
-var MAX_SPEED = 3;
-var MAX_FORCE = 0.3;
-var DESIRED_SEPARATION = 50;
+var FISH_NUMBER = 10;
+var NEIGHBOUR_RADIUS = 300;
+var MAX_SPEED = 4;
+var MAX_FORCE = 1;
+var DESIRED_SEPARATION = 100;
 
 var COLOR_COHERE = 0xd300cc;
 var COLOR_SEPARATION = 0xffd900;
 var COLOR_ALIGN = 0x3fd300;
+
+var ROTATION_MAX = 120;
+
+var distance = 100;
 
 // Fonction limitatrice ajouter a lobjet Phaser.Point
 Phaser.Point.prototype.limit = function(MAX) {
@@ -53,6 +57,8 @@ var Fish = function(x, y, graphics,fleche) {
 	//Permet de savoir quel poisson est en debug
 	this.isDebug = false;
 
+	this.test = 0;
+	
 	//Permet de créer le cercle
 	this.graphics = graphics;
 	
@@ -174,16 +180,76 @@ function afficherInformation (bool){
 Fish.prototype.step = function (neighbours){
 	
 	acceleration = this.flock(neighbours);
-	stayin = this.checkMurs();
+	stayin = this.checkMurs().multiply(20,20);
+	
+	// if(!(stayin.x == 0 && stayin.y === 0)){
+		// console.log("Wut");
+		// acceleration.x = 0;
+		// acceleration.y = 0;
+	// }
+	
 	dodge = this.checkObstacles();
 	
 	this.velocity.add(acceleration.x, acceleration.y).add(dodge.x, dodge.y).add(stayin.x, stayin.y).limit(MAX_SPEED);
 	
-	this.rotation = Math.atan2(this.velocity.y, this.velocity.x);
+	var magnitude = this.velocity.getMagnitude();
+	
+	var maxAngle = game.math.degToRad((ROTATION_MAX * game.time.elapsed) / 1000); //Donne l'angle maximal pour x temps.
+	
+	var targetAngle = this.game.math.angleBetween(
+        this.x, this.y,
+        (this.velocity.x + this.x), (this.velocity.y + this.y)
+    );
+
+	
+		if(this.isDebug && debug){
+
+		console.log(this.position);
+		console.log(this.velocity);
+		console.log(this.x + this.velocity.x);
+		console.log(this.y + this.velocity.y);
+		
+		
+	}
+	
+    // Gradually (this.TURN_RATE) aim the missile towards the target angle
+    if (this.rotation !== targetAngle) {
+        // Calculate difference between the current angle and targetAngle
+        var delta = targetAngle - this.rotation;
+
+        // Keep it in range from -180 to 180 to make the most efficient turns.
+        if (delta > Math.PI) delta -= Math.PI * 2;
+        if (delta < -Math.PI) delta += Math.PI * 2;
+
+        if (delta > 0) {
+            // Turn clockwise
+            this.rotation += maxAngle;
+        } else {
+            // Turn counter-clockwise
+            this.rotation -= maxAngle;
+        }
+
+        // Just set angle to target angle if they are close
+        if (Math.abs(delta) < maxAngle) {
+            this.rotation = targetAngle;
+        }
+    }
+
+	
+	
+	
+    // Calculate velocity vector based on this.rotation and this.SPEED
+    this.velocity.x = Math.cos(this.rotation) * magnitude * this.test;
+    this.velocity.y = Math.sin(this.rotation) * magnitude * this.test;
+	
+	
+	
+	//this.rotation = Math.atan2(this.velocity.y, this.velocity.x);
 	
 	this.body.position.add(this.velocity.x, this.velocity.y);
 	
 	if(this.isDebug && debug){
+	//console.log();
 		this.graphics.position.add(this.velocity.x, this.velocity.y); 
 		this.pointText.position.add(this.velocity.x, this.velocity.y); 
 		this.pointText.text = "(" + this.pointText.x.toFixed(0) + "," + this.pointText.y.toFixed(0) + ")";
@@ -346,6 +412,15 @@ Fish.prototype.separate = function (neighbours){
 			diff.divide(d, d);
 			mean.add(diff.x, diff.y);
 			count++;
+			
+
+				//tmp = Math.sqrt(d)/Math.sqrt(DESIRED_SEPARATION);
+			tmp = d/(DESIRED_SEPARATION + 100);
+			if (this.test > tmp){
+				this.test = tmp;
+			}
+			
+			console.log(this.test);
 		}
 	}
 
@@ -372,6 +447,7 @@ Fish.prototype.separate = function (neighbours){
 
 		mean.divide(count,count);
 	}
+	mean.multiply(50,50);
 
 	return mean;
 }
@@ -379,7 +455,7 @@ Fish.prototype.separate = function (neighbours){
 Fish.prototype.checkObstacles = function() {
 
 	var mean = new Phaser.Point();
-
+	return mean;
 	for (var x in obstacles.children){
 
 		var d = Phaser.Point.distance(this.body.position, obstacles.children[x].body.position);
@@ -408,44 +484,116 @@ Fish.prototype.checkMurs = function() {
 
 	var mean = new Phaser.Point();
 	var diff = Phaser.Point();
-
+	this.test = 1;
+	var count = 0;
+	
 	var distanceMurDroite = Phaser.Point.distance(this.body.position, new Phaser.Point(game.width - 50, this.body.y));
 	var distanceMurGauche = Phaser.Point.distance(this.body.position, new Phaser.Point(50, this.body.y));
 	var distanceMurHaut = Phaser.Point.distance(this.body.position, new Phaser.Point(this.body.x, 50));
 	var distanceMurBas= Phaser.Point.distance(this.body.position, new Phaser.Point(this.body.x , game.height - 50));
 
-	if (distanceMurDroite < 300){
-
-			diff = Phaser.Point.subtract(this.body.position, new Phaser.Point(game.width, this.body.y));
+	var i = 3;
+	
+	if (distanceMurDroite < distance){
+			
+			var tmp;
+			
+			if(distanceMurDroite <= 0){
+				var tmp = 0;
+			}else{
+				tmp = Math.sqrt(distanceMurDroite)/Math.sqrt(distance);
+			}
+			
+			if (this.test > tmp){
+				this.test = tmp;
+			}
+			
+			diff = Phaser.Point.subtract(this.body.position, new Phaser.Point(game.width - 50, this.body.y));
 			diff.normalize();
 			diff.divide(distanceMurDroite, distanceMurDroite);
-			mean.add(diff.x, diff.y);
+			//mean.add(diff.x, diff.y);
+			mean.x -= i;
+			//mean.Y += 1;
+			count++;
 	}
 
-	if (distanceMurGauche < 300){
+	if (distanceMurGauche < distance){
 
-			diff = Phaser.Point.subtract(this.body.position, new Phaser.Point(0, this.body.y));
+			var tmp;
+			
+			if(distanceMurGauche <= 0){
+				var tmp = 0;
+			}else{
+				tmp = Math.sqrt(distanceMurGauche)/Math.sqrt(distance);
+			}
+			
+			if (this.test > tmp){
+				this.test = tmp;
+			}
+	
+			diff = Phaser.Point.subtract(this.body.position, new Phaser.Point(50, this.body.y));
 			diff.normalize();
 			diff.divide(distanceMurGauche, distanceMurGauche);
-			mean.add(diff.x, diff.y);
+			//mean.add(diff.x, diff.y);
+			count++;
+			
+			mean.x += i;
+			//mean.Y += 1;
 	}
 
-	if (distanceMurHaut < 300){
-
-			diff = Phaser.Point.subtract(this.body.position, new Phaser.Point(this.body.x, 0));
+	if (distanceMurHaut < distance){
+			
+			var tmp;
+			
+			if(distanceMurHaut <= 0){
+				var tmp = 0;
+			}else{
+				tmp = Math.sqrt(distanceMurHaut)/Math.sqrt(distance);
+			}
+			
+			if (this.test > tmp){
+				this.test = tmp;
+			}
+			
+			diff = Phaser.Point.subtract(this.body.position, new Phaser.Point(this.body.x, 50));
 			diff.normalize();
 			diff.divide(distanceMurHaut, distanceMurHaut);
-			mean.add(diff.x, diff.y);
+			//mean.add(diff.x, diff.y);
+			count++;
+			
+			//mean.x += 1;
+			mean.y += i;
 	}
 
-	if (distanceMurBas < 300){
-
-			diff = Phaser.Point.subtract(this.body.position, new Phaser.Point(this.body.x , game.height));
+	if (distanceMurBas < distance){
+			
+			var tmp;
+			
+			if(distanceMurBas <= 0){
+				var tmp = 0;
+			}else{
+				tmp = Math.sqrt(distanceMurBas)/Math.sqrt(distance);
+			}
+			
+			if (this.test > tmp){
+				this.test = tmp;
+			}
+			
+			diff = Phaser.Point.subtract(this.body.position, new Phaser.Point(this.body.x , game.height - 50));
 			diff.normalize();
 			diff.divide(distanceMurBas, distanceMurBas);
-			mean.add(diff.x, diff.y);
+			//mean.add(diff.x, diff.y);
+			count++;
+			
+			//mean.x += 1;
+			mean.y -= i;
 	}
+	
+	if (count > 1){
 
+		//mean.divide(count,count);
+	}
+	
 	return mean;
 }
 
@@ -519,7 +667,7 @@ function create() {
 
 	// creer les poissons sur la scene
 	for(var i = 0; i < FISH_NUMBER; i++) {
-		banc.add(new Fish(Math.random() * game.width, Math.random() * game.height, graphics,fleche));
+		banc.add(new Fish(Math.random() * game.width / 1.1 + 100, Math.random() * game.height/1.1 + 100, graphics,fleche));
 	}
 
 	banc.setAll('inputEnabled', debug);
