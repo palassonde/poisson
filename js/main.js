@@ -495,10 +495,7 @@ function preload() {
 	this.game.load.spritesheet('fish2', 'assets/poisson3.png', 122, 70);
 	this.game.load.image('obstacle1', 'assets/obstacle1.png');
 	this.game.load.image('obstacle2', 'assets/obstacle2.png');
-	this.game.load.image('obstacle3', 'assets/obstacle3.png');
-	this.game.load.image('obstacle4', 'assets/obstacle4.png');
-	this.game.load.image('obstacle5', 'assets/obstacle5.png');
-	this.game.load.image('obstacle6', 'assets/obstacle6.png');
+
 }
 
 function create() {
@@ -520,10 +517,7 @@ function create() {
 	// creation obstacle
 	obstacles.create(785, 440, 'obstacle1');
 	obstacles.create(115, 455, 'obstacle2');
-	obstacles.create(700, 140, 'obstacle3');
-	obstacles.create(150, 50, 'obstacle4');
-	obstacles.create(400, 200, 'obstacle5');
-	obstacles.create(500, 492, 'obstacle6');
+	
 	obstacles.setAll('anchor.set', 0.5);
 
 	//active ou desactive le mode Debug

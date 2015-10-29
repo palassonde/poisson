@@ -6,11 +6,37 @@
     <link rel="stylesheet" href="css/style.css" type="text/css">
     <script type="text/javascript" src="js/phaser.min.js"></script>
     <script type="text/javascript" src="js/main.js"></script>
+	
   </head>
+ 
   <body>
-    <div id="game"></div>
+    
+	<div id="game"></div>
+    <div id="debug"></div>
+	
+	<div id="formulaire">
+	<form action="main.js" method="post" >
 
-    <div id="debug">
-    </div>
+		<fieldset>
+		<legend> Modifier paramètres : </legend>
+ 
+		<label for="nombrePoisson">Nombre de poissons :</label>
+		<input type="range" name="slider" id="nbPoinsson" value="10" min="1" max="20"/>
+	
+		<label for="vitessePoisson">vitesse des poissons :</label>
+		<input type="range" name="slider" id="vitessePoisson" value="10" min="1" max="20"/>
+	
+		<label for="vitesseAngulairePoisson">vitesse angulaire poissons :</label>
+		<input type="range" name="slider" id="vitesseAngulairePoisson" value="10" min="1" max="20"/>
+    
+	</fieldset>
+	<p>
+	<input type="submit" value="Envoyer" />
+	<input type="reset" value="Annuler" />
+	</p>
+
+	</form>
+	</div>
+
   </body>
 </html>
