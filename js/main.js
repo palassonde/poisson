@@ -19,7 +19,6 @@ var NEIGHBOUR_RADIUS = 100;
 var MAX_SPEED = 2;
 var MAX_FORCE = 0.15;
 var DESIRED_SEPARATION = 45;
-var ROTATION_MAX = 20;
 
 var COLOR_COHERE = 0xd300cc;
 var COLOR_SEPARATION = 0xffd900;
@@ -180,29 +179,8 @@ Fish.prototype.step = function (neighbours){
 	
 	this.velocity.add(acceleration.x, acceleration.y).add(dodge.x, dodge.y).add(stayin.x, stayin.y).limit(MAX_SPEED);
 	
-	var angle = Math.atan2(this.velocity.y, this.velocity.x);
-	var dif = Math.abs(angle - this.rotation);
-	if(dif > Math.PI){
-		dif = (2 * Math.PI) - dif;
-	}
-	
-	var maxAngle = (Math.PI / 180)*((ROTATION_MAX * game.time.elapsed) / 1000); //Donne l'angle maximal pour x temps.
-	
-	//Si le poisson bouge dans un trop gros angle (rectifier)
-	if(dif > maxAngle){	
-		var magnitude = this.velocity.getMagnitude();
-		//console.log(this.velocity);
-		if(angle > this.rotation){
-			this.velocity.y = Math.sin(this.rotation + maxAngle) * (magnitude);
-			this.velocity.x = Math.cos(this.rotation + maxAngle) * (magnitude);
-		}else{
-			this.velocity.y = Math.sin(this.rotation - maxAngle) * (magnitude);
-			this.velocity.x = Math.cos(this.rotation - maxAngle) * (magnitude);
-		}
-		
-	}
-	
 	this.rotation = Math.atan2(this.velocity.y, this.velocity.x);
+	
 	this.body.position.add(this.velocity.x, this.velocity.y);
 	
 	if(this.isDebug && debug){
