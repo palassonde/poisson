@@ -20,6 +20,7 @@ var MAX_SPEED = 3;
 var MAX_FORCE = 0.3;
 var DESIRED_SEPARATION = 50;
 
+// couleur du debug
 var COLOR_COHERE = 0xd300cc;
 var COLOR_SEPARATION = 0xffd900;
 var COLOR_ALIGN = 0x3fd300;
