@@ -18,13 +18,13 @@ var FISH_NUMBER = 10;
 var NEIGHBOUR_RADIUS = 300;
 var MAX_SPEED = 4;
 var MAX_FORCE = 1;
-var DESIRED_SEPARATION = 100;
+var DESIRED_SEPARATION = 80;
 
 var COLOR_COHERE = 0xd300cc;
 var COLOR_SEPARATION = 0xffd900;
 var COLOR_ALIGN = 0x3fd300;
 
-var ROTATION_MAX = 120;
+var ROTATION_MAX = 100;
 
 var distance = 100;
 
@@ -178,7 +178,7 @@ function afficherInformation (bool){
 
 // Premiere fonction du mouvement des poissons
 Fish.prototype.step = function (neighbours){
-	
+		this.test = 1;
 	acceleration = this.flock(neighbours);
 	stayin = this.checkMurs().multiply(20,20);
 	
@@ -415,7 +415,7 @@ Fish.prototype.separate = function (neighbours){
 			
 
 				//tmp = Math.sqrt(d)/Math.sqrt(DESIRED_SEPARATION);
-			tmp = d/(DESIRED_SEPARATION + 100);
+			tmp = d/(DESIRED_SEPARATION );
 			if (this.test > tmp){
 				this.test = tmp;
 			}
@@ -447,7 +447,7 @@ Fish.prototype.separate = function (neighbours){
 
 		mean.divide(count,count);
 	}
-	mean.multiply(50,50);
+	mean.multiply(7,7);
 
 	return mean;
 }
@@ -484,7 +484,7 @@ Fish.prototype.checkMurs = function() {
 
 	var mean = new Phaser.Point();
 	var diff = Phaser.Point();
-	this.test = 1;
+
 	var count = 0;
 	
 	var distanceMurDroite = Phaser.Point.distance(this.body.position, new Phaser.Point(game.width - 50, this.body.y));
