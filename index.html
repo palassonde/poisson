@@ -15,9 +15,8 @@
     <div id="debug"></div>
 	
 	<div id="formulaire">
-	<form action="main.js" method="post" >
+	<form onsubmit="setValues()" >
 
-		<fieldset>
 		<legend> Modifier paramètres : </legend>
  
 		<label for="nombrePoisson">Nombre de poissons :</label>
@@ -28,12 +27,12 @@
 	
 		<label for="vitesseAngulairePoisson">vitesse angulaire poissons :</label>
 		<input type="range" name="slider" id="vitesseAngulairePoisson" value="10" min="1" max="20"/>
-    
-	</fieldset>
-	<p>
-	<input type="submit" value="Envoyer" />
-	<input type="reset" value="Annuler" />
-	</p>
+
+
+		<p>
+		<input type="submit" value="Envoyer"/>
+		<input type="reset" value="Annuler" />
+		</p>
 
 	</form>
 	</div>

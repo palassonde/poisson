@@ -685,6 +685,11 @@ function debugText (){
 	afficherInformation(debug);
 }
 
+function setValues(){
+
+	MAX_SPEED = document.getElementById("vitessePoisson").value;
+}
+
 function update(){
 
 	for (var x in banc.children){
