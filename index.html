@@ -15,50 +15,50 @@
     <div id="debug"></div>
 	
 	<div id="formulaire">
-	<form action="js/main.js" method="POST" >
+		<form>
 
-		<fieldset>
-		<legend> Modifier paramètres : </legend>
-		
-		<label for="valeur">La valeur du curseur :</label>
-		<input type="text" id="textInput" value="">
-		
-		<label for="nombrePoisson">Nombre de poissons :</label>
-		<input type="range" name="slider1" id="nbPoisson" value="10" min="1" max="20" onchange="updateTextInput(this.value);"/>
-		
-		
-		<label for="rayonMoyen">Le rayon moyen d'un voisinage :</label>
-		<input type="range" name="slider1" id="rayonMoyen" value="10" min="1" max="20" onchange="updateTextInput(this.value);"/>
-		
-		
-		<label for="rayonMoyenSeparation">Le rayon moyen de séparation:</label>
-		<input type="range" name="slider1" id="rayonMoyenSeparation" value="10" min="1" max="20" onchange="updateTextInput(this.value);"/>
-		
-		
-		<label for="vitessePoisson">vitesse des poissons :</label>
-		<input type="range" name="slider2" id="vitessePoisson" value="10" min="1" max="20" onchange="updateTextInput(this.value);"/>
-	    
-		 
-		<label for="vitesseAngulairePoisson">vitesse angulaire poissons :</label>
-		<input type="range" name="slider3" id="vitesseAngulairePoisson" value="10" min="1" max="20" onchange="updateTextInput(this.value);"/>
-		
-		
-	</fieldset>
-	<p>
-	<input type="submit" value="Envoyer" />
-	<input type="reset" value="Annuler" />
-	</p>
-	</form>
+			<fieldset>
+			<legend> Modifier paramètres : </legend>
+			
+			<label for="valeur">La valeur du curseur :</label>
+			<input type="text" id="textInput" value="X">
+			
+			<label for="nombrePoisson">Nombre de poissons :</label>
+			<input type="range" name="slider1" id="nbPoisson" value="10" min="0" max="100" onchange="updateTextInput(this.value);setValues();"/>
+			
+			
+			<label for="rayonMoyen">Le rayon moyen d'un voisinage :</label>
+			<input type="range" name="slider2" id="rayonMoyen" value="300" min="0" max="1000" onchange="updateTextInput(this.value);setValues();"/>
+			
+			
+			<label for="rayonMoyenSeparation">Le rayon moyen de séparation:</label>
+			<input type="range" name="slider3" id="rayonMoyenSeparation" value="80" min="0" max="200" onchange="updateTextInput(this.value);setValues();"/>
+			
+			
+			<label for="vitessePoisson">vitesse des poissons :</label>
+			<input type="range" name="slider4" id="vitessePoisson" value="4" min="0" max="20" onchange="updateTextInput(this.value);setValues();"/>
+		    
+			 
+			<label for="vitesseAngulairePoisson">vitesse angulaire poissons :</label>
+			<input type="range" name="slider5" id="vitesseAngulairePoisson" value="100" min="0" max="200" onchange="updateTextInput(this.value);setValues();"/>
+
+			<label for="force">Force d'attraction :</label>
+			<input type="range" name="slider6" id="force" value="4" min="1" max="20" onchange="updateTextInput(this.value);setValues();"/>
+			
+			</fieldset>
+			<input type="reset" value="Annuler" />
+		</form>
 	</div>
-<div id= "result"></div>
-	
-	
+
+	<div id= "result"></div>
+
 	<script type="text/javascript">
-    function updateTextInput(val) {
-      document.getElementById('textInput').value=val; 
-	   
-    }
-  </script>
+
+	    function updateTextInput(val) {
+	      document.getElementById('textInput').value=val; 
+		   
+	    }
+	</script>
 	
   </body>
 </html>

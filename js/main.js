@@ -19,13 +19,12 @@ var NEIGHBOUR_RADIUS = 300;
 var MAX_SPEED = 4;
 var MAX_FORCE = 1;
 var DESIRED_SEPARATION = 80;
+var ROTATION_MAX = 100;
 
 // couleur du debug
 var COLOR_COHERE = 0xd300cc;
 var COLOR_SEPARATION = 0xffd900;
 var COLOR_ALIGN = 0x3fd300;
-
-var ROTATION_MAX = 100;
 
 var distance = 100;
 
@@ -182,12 +181,6 @@ Fish.prototype.step = function (neighbours){
 		this.test = 1;
 	acceleration = this.flock(neighbours);
 	stayin = this.checkMurs().multiply(20,20);
-	
-	// if(!(stayin.x == 0 && stayin.y === 0)){
-		// console.log("Wut");
-		// acceleration.x = 0;
-		// acceleration.y = 0;
-	// }
 	
 	dodge = this.checkObstacles();
 	
@@ -413,15 +406,12 @@ Fish.prototype.separate = function (neighbours){
 			diff.divide(d, d);
 			mean.add(diff.x, diff.y);
 			count++;
-			
 
-				//tmp = Math.sqrt(d)/Math.sqrt(DESIRED_SEPARATION);
 			tmp = d/(DESIRED_SEPARATION );
 			if (this.test > tmp){
 				this.test = tmp;
 			}
 			
-			console.log(this.test);
 		}
 	}
 
@@ -600,17 +590,16 @@ Fish.prototype.checkMurs = function() {
 
 //Permet de creer un fleche
 function createFleche(graphic, color){
+
 	graphic.lineStyle(5, color, 0.7);
 	graphic.beginFill(color, 0.7);
-	
 	graphic.moveTo(0,10);
 	graphic.lineTo(40,10);
 	graphic.lineTo(40,5);
 	graphic.lineTo(50,10);
 	graphic.lineTo(40,15);
 	graphic.lineTo(40,10);
-		//fleche.lineTo(10, 70);
-		graphic.endFill();
+	graphic.endFill();
 }
 
 function preload() {
@@ -622,7 +611,6 @@ function preload() {
 	this.game.load.spritesheet('fish2', 'assets/poisson3.png', 122, 70);
 	this.game.load.image('obstacle1', 'assets/obstacle1.png');
 	this.game.load.image('obstacle2', 'assets/obstacle2.png');
-
 }
 
 function create() {
@@ -663,7 +651,7 @@ function create() {
 	text.visible = false;
 	
 	var style2 = {font: "12px Arial", fill: "#ffffff"};
-	boutonDebug = this.add.text(0,0, "Appuyer sur D pour activer le mode debug", style2);
+	boutonDebug = this.add.text(25,25, "Appuyer sur D pour activer le mode debug", style2);
 	boutonDebug.visible = true;
 
 	// creer les poissons sur la scene
@@ -681,13 +669,17 @@ function debugText (){
 	text.visible = debug;
 	boutonDebug.visible = !debug;
 	banc.setAll('inputEnabled', debug);
-
 	afficherInformation(debug);
 }
 
 function setValues(){
 
 	MAX_SPEED = document.getElementById("vitessePoisson").value;
+	FISH_NUMBER = document.getElementById("nbPoisson").value;
+	NEIGHBOUR_RADIUS = document.getElementById("rayonMoyen").value;
+	DESIRED_SEPARATION = document.getElementById("rayonMoyenSeparation").value;
+	ROTATION_MAX = document.getElementById("vitesseAngulairePoisson").value;
+	MAX_FORCE = document.getElementById("force").value;
 }
 
 function update(){
