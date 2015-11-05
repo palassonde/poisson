@@ -9,7 +9,7 @@ form {
 	width:250px;
 	position: absolute;
 	left: 1040px;
-	top: 50px
+	top: 0px
 
 }
 
@@ -61,4 +61,10 @@ input[type=submit], input[type=reset] {
 	margin-left:5px;
 	box-shadow:1px 1px 1px #D83F3D;
 	cursor:pointer;
+}
+
+input[type=text] {
+	width:25px;
+	margin-left:85px;
+	box-shadow:1px 1px 1px #D83F3D;
 }

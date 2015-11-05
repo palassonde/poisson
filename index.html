@@ -12,7 +12,6 @@
   <body>
     
 	<div id="game"></div>
-    <div id="debug"></div>
 	
 	<div id="formulaire">
 		<form>
@@ -21,32 +20,33 @@
 			<legend> Modifier paramètres : </legend>
 			
 			<label for="valeur">La valeur du curseur :</label>
-			<input type="text" id="textInput" value="X">
 			
 			<label for="nombrePoisson">Nombre de poissons :</label>
-			<input type="range" name="slider1" id="nbPoisson" value="10" min="0" max="100" onchange="updateTextInput(this.value);setValues();"/>
-			
+			<input type="range" name="slider1" id="nbPoisson" value="10" min="0" max="100" onchange="updateTextInput(this.value,'nb');createFishes();"/>
+			<input type="text" id="nb" value="10" disabled>
 			
 			<label for="rayonMoyen">Le rayon moyen d'un voisinage :</label>
-			<input type="range" name="slider2" id="rayonMoyen" value="300" min="0" max="1000" onchange="updateTextInput(this.value);setValues();"/>
-			
+			<input type="range" name="slider2" id="rayonMoyen" value="300" min="0" max="1000" onchange="updateTextInput(this.value,'rayon');setValues();"/>
+			<input type="text" id="rayon" value="300" disabled>
 			
 			<label for="rayonMoyenSeparation">Le rayon moyen de séparation:</label>
-			<input type="range" name="slider3" id="rayonMoyenSeparation" value="80" min="0" max="200" onchange="updateTextInput(this.value);setValues();"/>
-			
+			<input type="range" name="slider3" id="rayonMoyenSeparation" value="80" min="0" max="200" onchange="updateTextInput(this.value,'rayonsep');setValues();"/>
+			<input type="text" id="rayonsep" value="80" disabled>
 			
 			<label for="vitessePoisson">vitesse des poissons :</label>
-			<input type="range" name="slider4" id="vitessePoisson" value="4" min="0" max="20" onchange="updateTextInput(this.value);setValues();"/>
-		    
+			<input type="range" name="slider4" id="vitessePoisson" value="4" min="0" max="20" onchange="updateTextInput(this.value,'vitesse');setValues();"/>
+		    <input type="text" id="vitesse" value="4" disabled>
 			 
 			<label for="vitesseAngulairePoisson">vitesse angulaire poissons :</label>
-			<input type="range" name="slider5" id="vitesseAngulairePoisson" value="100" min="0" max="200" onchange="updateTextInput(this.value);setValues();"/>
+			<input type="range" name="slider5" id="vitesseAngulairePoisson" value="100" min="0" max="200" onchange="updateTextInput(this.value,'vitesseAng');setValues();"/>
+			<input type="text" id="vitesseAng" value="100" disabled>
 
 			<label for="force">Force d'attraction :</label>
-			<input type="range" name="slider6" id="force" value="4" min="1" max="20" onchange="updateTextInput(this.value);setValues();"/>
-			
+			<input type="range" name="slider6" id="force" value="1" min="0" max="10" onchange="updateTextInput(this.value,'att');setValues();"/>
+			<input type="text" id="att" value="1" disabled>
+
 			</fieldset>
-			<input type="reset" value="Annuler" />
+			<input type="reset" value="RESET" onclick="createFishes();setValues();" />
 		</form>
 	</div>
 
@@ -54,8 +54,8 @@
 
 	<script type="text/javascript">
 
-	    function updateTextInput(val) {
-	      document.getElementById('textInput').value=val; 
+	    function updateTextInput(val,id) {
+	      document.getElementById(id).value=val; 
 		   
 	    }
 	</script>

@@ -14,7 +14,6 @@ var text;
 var boutonDebug;
 
 //Constantes a parametriser
-var FISH_NUMBER = 10;
 var NEIGHBOUR_RADIUS = 300;
 var MAX_SPEED = 4;
 var MAX_FORCE = 1;
@@ -631,7 +630,7 @@ function create() {
 	
 	// creation obstacle
 	obstacles.create(785, 440, 'obstacle1');
-	obstacles.create(115, 455, 'obstacle2');
+	obstacles.create(412, 200, 'obstacle2');
 	
 	obstacles.setAll('anchor.set', 0.5);
 
@@ -647,7 +646,7 @@ function create() {
 
 	//Texte pour le mode debug
 	var style = {font: "12px Arial", fill: "#ffffff"};
-	text = this.add.text(0,0, "Debug activé (appuyer sur un poisson)", style);
+	text = this.add.text(25,25, "Debug activé ! (cliquez sur un poisson)", style);
 	text.visible = false;
 	
 	var style2 = {font: "12px Arial", fill: "#ffffff"};
@@ -655,12 +654,32 @@ function create() {
 	boutonDebug.visible = true;
 
 	// creer les poissons sur la scene
-	for(var i = 0; i < FISH_NUMBER; i++) {
+	for(var i = 0; i < 10; i++) {
 		banc.add(new Fish(Math.random() * game.width / 1.1 + 100, Math.random() * game.height/1.1 + 100, graphics,fleche));
 	}
 
 	banc.setAll('inputEnabled', debug);
 
+}
+
+function createFishes(){
+	
+	var nb = document.getElementById("nbPoisson").value;
+	var graphics = game.add.graphics(0, 0);
+	var fleche = game.add.graphics(0, 0);
+
+	
+	for (var x in banc.children){
+		banc.children[x].effaceInfo();
+	}
+
+	banc.destroy();
+	banc = game.add.group();
+
+	for(var i = 0; i < nb ; i++) {
+		banc.add(new Fish(Math.random() * game.width / 1.1 + 100, Math.random() * game.height/1.1 + 100, graphics,fleche));
+	}
+	banc.setAll('inputEnabled', debug);
 }
 
 function debugText (){
@@ -675,7 +694,6 @@ function debugText (){
 function setValues(){
 
 	MAX_SPEED = document.getElementById("vitessePoisson").value;
-	FISH_NUMBER = document.getElementById("nbPoisson").value;
 	NEIGHBOUR_RADIUS = document.getElementById("rayonMoyen").value;
 	DESIRED_SEPARATION = document.getElementById("rayonMoyenSeparation").value;
 	ROTATION_MAX = document.getElementById("vitesseAngulairePoisson").value;
