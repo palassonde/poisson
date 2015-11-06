@@ -265,6 +265,7 @@ Fish = function (x, y, game, banc, variable, obstacles) {
 	// Relier a lobjet sprite de phaser
 	this.poisson.anchor.setTo(0.5, 0.5);
 	game.physics.arcade.enableBody(this.poisson);
+	this.poisson.body.collideWorldBounds = true;
 
 	// Animations
 	this.poisson.animations.play('droite');
