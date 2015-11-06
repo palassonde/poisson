@@ -22,10 +22,6 @@ MyGame.Game = function (game) {
     this.rnd;       //  the repeatable random number generator (Phaser.RandomDataGenerator)
 };
 
-
-
-
-
 MyGame.Game.prototype = {
 
     create : function (game) {
@@ -89,8 +85,9 @@ MyGame.Game.prototype = {
 		
 		var nbPoisson = document.getElementById("nbPoisson").value;
 		var speed = document.getElementById("vitessePoisson").value;
-		var raduis = document.getElementById("rayonMoyen").value;
-		var separation = document.getElementById("rayonMoyenSeparation").value;
+		var alignment_radius = document.getElementById("rayonMoyenAlignement").value;
+		var cohesion_radius = document.getElementById("rayonMoyenCohesion").value;
+		var separation_radius = document.getElementById("rayonMoyenSeparation").value;
 		var rotation = document.getElementById("vitesseAngulairePoisson").value;
 		var force = document.getElementById("force").value;
 		
@@ -99,10 +96,11 @@ MyGame.Game.prototype = {
 			this.createPoisson();
 		}
 		
-		this.variable.DESIRED_SEPARATION = separation;
+		this.variable.SEPARATION_RADIUS = separation_radius;
+		this.variable.COHESION_RADIUS = cohesion_radius;
+		this.variable.ALIGNMENT_RADIUS = alignment_radius;
 		this.variable.MAX_SPEED = speed;
 		this.variable.MAX_FORCE = force;
-		this.variable.NEIGHBOUR_RADIUS = raduis;
 		this.variable.ROTATION_MAX = rotation;
 		
 		for (var x in this.banc){
@@ -145,10 +143,11 @@ MyGame.Game.prototype = {
 variable = function () {
 
 		this.FISH_NUMBER = 5;
-		this.NEIGHBOUR_RADIUS = 300;
+		this.ALIGNMENT_RADIUS = 300;
+		this.COHESION_RADIUS = 300;
+		this.SEPARATION_RADIUS = 80;
 		this.MAX_SPEED = 4;
 		this.MAX_FORCE = 1;
-		this.DESIRED_SEPARATION = 80;
 		this.COLOR_COHERE = 0xd300cc;
 		this.COLOR_SEPARATION = 0xffd900;
 		this.COLOR_ALIGN = 0x3fd300;
@@ -158,8 +157,6 @@ variable = function () {
 };
 
 Fish = function (x, y, game, banc, variable, obstacles, graphic) {
-
-	
 
 	this.variable = variable;
 	this.obstacles = obstacles;
@@ -347,7 +344,7 @@ Fish.prototype = {
 
 			var d = Phaser.Point.distance(this.poisson.body.position, neighbours[x].poisson.body.position);
 
-			if (d > 0 && d < this.variable.NEIGHBOUR_RADIUS){
+			if (d > 0 && d < this.variable.COHESION_RADIUS){
 				
 
 				//Si un poisson en Debug et le debug est actif
@@ -489,15 +486,15 @@ Fish.prototype = {
 
 		//Cercle de séparation
 		this.graphics.beginFill(this.variable.COLOR_SEPARATION, 0.5);
-		this.graphics.drawCircle(this.poisson.body.x + ((this.poisson.body.width)/2), this.poisson.body.y + ((this.poisson.body.height)/2), this.variable.DESIRED_SEPARATION * 2);
+		this.graphics.drawCircle(this.poisson.body.x + ((this.poisson.body.width)/2), this.poisson.body.y + ((this.poisson.body.height)/2), this.variable.SEPARATION_RADIUS * 2);
 		
 		//Cercle d'alignement
 		this.graphics.beginFill(this.variable.COLOR_ALIGN, 0.5);
-		this.graphics.drawCircle(this.poisson.body.x + ((this.poisson.body.width)/2), this.poisson.body.y + ((this.poisson.body.height)/2), this.variable.NEIGHBOUR_RADIUS*2);
+		this.graphics.drawCircle(this.poisson.body.x + ((this.poisson.body.width)/2), this.poisson.body.y + ((this.poisson.body.height)/2), this.variable.ALIGNMENT_RADIUS*2);
 			
 		//Cercle de cohesion
 		this.graphics.beginFill(this.variable.COLOR_COHERE, 0.5);
-		this.graphics.drawCircle(this.poisson.body.x + ((this.poisson.body.width)/2), this.poisson.body.y + ((this.poisson.body.height)/2), 500);
+		this.graphics.drawCircle(this.poisson.body.x + ((this.poisson.body.width)/2), this.poisson.body.y + ((this.poisson.body.height)/2), this.variable.COHESION_RADIUS*2);
 		
 		this.pointText.x = this.poisson.body.x;
 		this.pointText.y = this.poisson.body.y;

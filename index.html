@@ -18,6 +18,9 @@
 	<script type="text/javascript">
 
 	function updateTextInput(val,id) {
+		if (val > document.getElementById(id).max){
+			
+		}
 	      document.getElementById(id).value=val; 		   
 	}
 	
@@ -43,38 +46,36 @@
 			<fieldset>
 			<legend> Modifier paramètres : </legend>
 			
-			<label for="valeur">La valeur du curseur :</label>
-			
 			<label for="nombrePoisson">Nombre de poissons :</label>
-			<input type="range" name="slider1" id="nbPoisson" value="10" min="0" max="100" onchange="updateTextInput(this.value,'nb');createFishes(game);"/>
-			<input type="text" id="nb" value="10" disabled>
+			<input type="range" name="slider1" id="nbPoisson" value="10" min="0" max="100" onchange="updateTextInput(this.value,'nb')"/>
+			<input type="text" id="nb" value="10" onchange="updateTextInput(this.value,'nb')">
 			
 			<label for="rayonMoyenAlignement">Le rayon moyen d'alignement :</label>
-			<input type="range" name="slider2" id="rayonMoyenAlignement" value="300" min="0" max="1000" onchange="updateTextInput(this.value,'rayonali');setValues();"/>
+			<input type="range" name="slider2" id="rayonMoyenAlignement" value="300" min="0" max="1000" onchange="updateTextInput(this.value,'rayonali')"/>
 			<input type="text" id="rayonali" value="300" disabled>
 
-			<label for="rayonMoyenCollusion">Le rayon moyen de collusion:</label>
-			<input type="range" name="slider2" id="rayonMoyenCollusion" value="300" min="0" max="1000" onchange="updateTextInput(this.value,'rayoncol');setValues();"/>
+			<label for="rayonMoyenCohesion">Le rayon moyen de cohesion:</label>
+			<input type="range" name="slider2" id="rayonMoyenCohesion" value="300" min="0" max="1000" onchange="updateTextInput(this.value,'rayoncol')"/>
 			<input type="text" id="rayoncol" value="300" disabled>
 			
 			<label for="rayonMoyenSeparation">Le rayon moyen de séparation:</label>
-			<input type="range" name="slider3" id="rayonMoyenSeparation" value="80" min="0" max="200" onchange="updateTextInput(this.value,'rayonsep');setValues();"/>
+			<input type="range" name="slider3" id="rayonMoyenSeparation" value="80" min="0" max="200" onchange="updateTextInput(this.value,'rayonsep')"/>
 			<input type="text" id="rayonsep" value="80" disabled>
 			
 			<label for="vitessePoisson">vitesse des poissons :</label>
-			<input type="range" name="slider4" id="vitessePoisson" value="4" min="0" max="20" onchange="updateTextInput(this.value,'vitesse');setValues();"/>
+			<input type="range" name="slider4" id="vitessePoisson" value="4" min="0" max="20" onchange="updateTextInput(this.value,'vitesse')"/>
 		    <input type="text" id="vitesse" value="4" disabled>
 			 
 			<label for="vitesseAngulairePoisson">vitesse angulaire poissons :</label>
-			<input type="range" name="slider5" id="vitesseAngulairePoisson" value="100" min="0" max="200" onchange="updateTextInput(this.value,'vitesseAng');setValues();"/>
+			<input type="range" name="slider5" id="vitesseAngulairePoisson" value="100" min="0" max="200" onchange="updateTextInput(this.value,'vitesseAng')"/>
 			<input type="text" id="vitesseAng" value="100" disabled>
 
-			<label for="force">Force d'attraction :</label>
-			<input type="range" name="slider6" id="force" value="1" min="0" max="10" onchange="updateTextInput(this.value,'att');setValues();"/>
+			<label for="force">Force maximum :</label>
+			<input type="range" name="slider6" id="force" value="1" min="0" max="10" onchange="updateTextInput(this.value,'att')"/>
 			<input type="text" id="att" value="1" disabled>
 
 			</fieldset>
-			<input type="reset" value="RESET" onclick="createFishes();setValues();" />
+			<input type="reset" value="RESET"/>
 		</form>
 	</div>
 
