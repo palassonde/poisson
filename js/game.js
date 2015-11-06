@@ -30,7 +30,7 @@ MyGame.Game.prototype = {
 		this.game.add.tileSprite(0, 0, game.width, game.height, 'background');
 				
 		//VariableGlobal
-		this.variable = new variable();
+		this.variable = new variable(game);
 
 		this.banc =[];
 		
@@ -59,9 +59,15 @@ MyGame.Game.prototype = {
 		//active ou desactive le mode Debug
 		this.actionKey = this.game.input.keyboard.addKey(Phaser.Keyboard.D);
 		this.actionKey.onDown.add(this.debugText, this);
-
-		//Graphic pour dessiner disque
-		this.graphics = game.add.graphics(0, 0);
+		
+		this.actionKeyCohere = this.game.input.keyboard.addKey(Phaser.Keyboard.C);
+		this.actionKeyCohere.onDown.add(this.setCohereVision, this);
+		
+		this.actionKeySeperate = this.game.input.keyboard.addKey(Phaser.Keyboard.S);
+		this.actionKeySeperate.onDown.add(this.setSeperateVision, this);
+		
+		this.actionKeyAlign = this.game.input.keyboard.addKey(Phaser.Keyboard.A);
+		this.actionKeyAlign.onDown.add(this.setAlignVision, this);
 
 		//Texte pour le mode debug
 		var style = {font: "12px Arial", fill: "#ffffff"};
@@ -71,11 +77,12 @@ MyGame.Game.prototype = {
 		var style2 = {font: "12px Arial", fill: "#ffffff"};
 		this.boutonDebug = this.add.text(25,25, "Appuyer sur D pour activer le mode debug", style2);
 		this.boutonDebug.visible = true;
+
 		
 		// creer les poissons sur la scene
 		for(var i = 0; i < this.variable.FISH_NUMBER; i++) {
 			this.banc.push(new Fish(Math.random() * game.width / 1.1 + 100, Math.random() * game.height/1.1 + 100, 
-									this.game,this.banc,this.variable, this.obstacles, this.graphics));
+									this.game,this.banc,this.variable, this.obstacles));
 			
 		}
 		
@@ -91,14 +98,23 @@ MyGame.Game.prototype = {
 		var rotation = document.getElementById("vitesseAngulairePoisson").value;
 		var force = document.getElementById("force").value;
 		
-		if(this.variable.FISH_NUMBER != nbPoisson){
+		if(this.variable.FISH_NUMBER !== nbPoisson){
 			this.variable.FISH_NUMBER = nbPoisson;
 			this.createPoisson();
 		}
 		
-		this.variable.SEPARATION_RADIUS = separation_radius;
-		this.variable.COHESION_RADIUS = cohesion_radius;
-		this.variable.ALIGNMENT_RADIUS = alignment_radius;
+		if(this.variable.SEPARATION_RADIUS !== separation_radius){
+			this.variable.SEPARATION_RADIUS = separation_radius;
+		}
+		
+		if(this.variable.COHESION_RADIUS !== cohesion_radius){
+			this.variable.COHESION_RADIUS = cohesion_radius;
+		}
+		
+		if(this.variable.ALIGNMENT_RADIUS !== alignment_radius){
+			this.variable.ALIGNMENT_RADIUS = alignment_radius;
+		}
+
 		this.variable.MAX_SPEED = speed;
 		this.variable.MAX_FORCE = force;
 		this.variable.ROTATION_MAX = rotation;
@@ -109,10 +125,38 @@ MyGame.Game.prototype = {
 		
     },
 	
+	setTexte : function (){
+		if(this.variable.debug){
+			 this.text.setText("Debug activé (appuyer sur un poisson)" + "\nDébug Cohésion (appuyer sur C) : " + this.variable.visibleCohere + "\nDébug Sépération (appuyer sur S) : " + this.variable.visibleSeperation + "\nDébug Alignement (appuyer sur A) : " + this.variable.visibleAlign);
+		}
+	},
+	
+	setCohereVision : function (){
+		this.variable.visibleCohere = !this.variable.visibleCohere;
+		this.setTexte();
+		this.variable.cercles_cohere.visible = (this.variable.visibleCohere ||  this.variable.visibleSeperation);
+		
+	},
+	
+	setSeperateVision : function (a,b){
+		this.variable.visibleSeperation = !this.variable.visibleSeperation;
+		this.setTexte();
+		this.variable.cercles_separation.visible = this.variable.visibleSeperation;
+		this.variable.cercles_cohere.visible = (this.variable.visibleCohere ||  this.variable.visibleSeperation);
+		this.variable.cercles_align.visible = (this.variable.visibleAlign || this.variable.visibleSeperation);
+	},
+	
+	setAlignVision : function (a,b){
+		this.variable.visibleAlign = !this.variable.visibleAlign;
+		this.setTexte();
+		this.variable.cercles_align.visible = (this.variable.visibleAlign || this.variable.visibleSeperation);
+	},
+	
 	debugText: function (){
 
 		this.variable.debug = !this.variable.debug;
 		this.text.visible = this.variable.debug;
+		this.setTexte();
 		this.boutonDebug.visible = !this.variable.debug;
 		
 		//Desactive-active l'Action de clique sur le poisson
@@ -134,13 +178,13 @@ MyGame.Game.prototype = {
 		// creer les poissons sur la scene
 		for(var i = 0; i < this.variable.FISH_NUMBER; i++) {
 			this.banc.push(new Fish(Math.random() * this.game.width, Math.random() * this.game.height, 
-									this.game,this.banc,this.variable, this.obstacles, this.graphics));
+									this.game,this.banc,this.variable, this.obstacles));
 		}
 
 	}
 };
 
-variable = function () {
+variable = function (game) {
 
 		this.FISH_NUMBER = 10;
 		this.ALIGNMENT_RADIUS = 300;
@@ -154,13 +198,20 @@ variable = function () {
 		this.ROTATION_MAX = 100;
 		this.distance = 100;
 		this.debug = false;
+		this.visibleCohere = true;
+		this.visibleSeperation = true;
+		this.visibleAlign = true;
+		
+		//Graphic pour dessiner disque
+		this.cercles_separation = game.add.graphics(0, 0);
+		this.cercles_align = game.add.graphics(0, 0);
+		this.cercles_cohere = game.add.graphics(0, 0);
 };
 
-Fish = function (x, y, game, banc, variable, obstacles, graphic) {
+Fish = function (x, y, game, banc, variable, obstacles) {
 
 	this.variable = variable;
 	this.obstacles = obstacles;
-	this.graphics = graphic;
 	this.banc = banc;
 	
 	if(x > game.width / 2){
@@ -182,26 +233,27 @@ Fish = function (x, y, game, banc, variable, obstacles, graphic) {
 
 	this.magnitudeRelentir = 0;
 	
+	var graphics = game.add.graphics(0, 0);
 	//Créer une pointe pour la cohesion
-	createFleche(this.graphics,this.variable.COLOR_COHERE);
-	this.pointeCohere = game.add.sprite(0, 0, this.graphics.generateTexture());
+	createFleche(graphics,this.variable.COLOR_COHERE);
+	this.pointeCohere = game.add.sprite(0, 0, graphics.generateTexture());
 	this.pointeCohere.anchor.y = 0.5;
 	this.pointeCohere.visible = false;
-	this.graphics.clear();
+	graphics.clear();
 	
 	// //Créer un vecteur de direction (align)
-	createFleche(this.graphics,this.variable.COLOR_ALIGN);
-	this.vecteurAlign = game.add.sprite(0, 0, this.graphics.generateTexture());
+	createFleche(graphics,this.variable.COLOR_ALIGN);
+	this.vecteurAlign = game.add.sprite(0, 0, graphics.generateTexture());
 	this.vecteurAlign.anchor.y = 0.5;
 	this.vecteurAlign.visible = false;
-	this.graphics.clear();
+	graphics.clear();
 	
 	// //Créer un vecteur de direction (separation)
-	createFleche(this.graphics, this.variable.COLOR_SEPARATION);
-	this.vecteurSeparation = game.add.sprite(0, 0, this.graphics.generateTexture());
+	createFleche(graphics, this.variable.COLOR_SEPARATION);
+	this.vecteurSeparation = game.add.sprite(0, 0, graphics.generateTexture());
 	this.vecteurSeparation.anchor.y = 0.5;
 	this.vecteurSeparation.visible = false;
-	this.graphics.clear();
+	graphics.clear();
 	
 	// Vitesse de depart
 	this.velocity = new Phaser.Point();
@@ -268,9 +320,13 @@ Fish.prototype = {
 		this.poisson.body.position.add(this.velocity.x, this.velocity.y);
 		
 		if(this.isDebug && this.variable.debug){
-			this.graphics.position.add(this.velocity.x, this.velocity.y); 
+			this.variable.cercles_separation.position.add(this.velocity.x, this.velocity.y); 
+			this.variable.cercles_align.position.add(this.velocity.x, this.velocity.y);
+			this.variable.cercles_cohere.position.add(this.velocity.x, this.velocity.y);
+			 
 			this.pointText.position.add(this.velocity.x, this.velocity.y); 
 			this.pointText.text = "(" + this.pointText.x.toFixed(0) + "," + this.pointText.y.toFixed(0) + ")";
+			this.pointText.visible = this.variable.visibleCohere;
 		}
 	},
 
@@ -314,7 +370,7 @@ Fish.prototype = {
 				this.vecteurSeparation.x = this.poisson.body.x + ((this.poisson.body.width)/2);
 				this.vecteurSeparation.y = this.poisson.body.y + ((this.poisson.body.height)/2);
 				this.vecteurSeparation.rotation = Math.atan2(mean.y, mean.x);		
-				this.vecteurSeparation.visible = true;
+				this.vecteurSeparation.visible = this.variable.visibleSeperation;
 			}
 			
 			mean.multiply(this.variable.MAX_SPEED, this.variable.MAX_SPEED);
@@ -352,7 +408,7 @@ Fish.prototype = {
 					neighbours[x].pointText.x = neighbours[x].poisson.body.x;
 					neighbours[x].pointText.y = neighbours[x].poisson.body.y;
 					neighbours[x].pointText.text = "(" + neighbours[x].poisson.body.x.toFixed(0) + "," + neighbours[x].poisson.body.y.toFixed(0) + ")";
-					neighbours[x].pointText.visible = true;
+					neighbours[x].pointText.visible = this.variable.visibleCohere;
 				}
 				
 
@@ -376,7 +432,7 @@ Fish.prototype = {
 				this.pointeCohere.x = this.poisson.body.x + ((this.poisson.body.width)/2);
 				this.pointeCohere.y = this.poisson.body.y + ((this.poisson.body.height)/2);
 				this.pointeCohere.rotation = Math.atan2(target.y - this.pointeCohere.y, target.x - this.pointeCohere.x);			
-				this.pointeCohere.visible = true;
+				this.pointeCohere.visible = this.variable.visibleCohere;
 			}
 			
 			return this.steer_to(target);
@@ -430,7 +486,7 @@ Fish.prototype = {
 					voisin.vecteurAlign.x = voisin.poisson.body.x + ((voisin.poisson.body.width)/2);
 					voisin.vecteurAlign.y = voisin.poisson.body.y + ((voisin.poisson.body.height)/2);
 					voisin.vecteurAlign.rotation = Math.atan2(voisin.velocity.y, voisin.velocity.x);			
-					voisin.vecteurAlign.visible = true;
+					voisin.vecteurAlign.visible = this.variable.visibleAlign;
 				}
 				
 				mean.add(voisin.velocity.x, voisin.velocity.y);
@@ -451,7 +507,7 @@ Fish.prototype = {
 				this.vecteurAlign.x = this.poisson.body.x + ((this.poisson.body.width)/2);
 				this.vecteurAlign.y = this.poisson.body.y + ((this.poisson.body.height)/2);
 				this.vecteurAlign.rotation = Math.atan2(mean.y, mean.x);		
-				this.vecteurAlign.visible = true;
+				this.vecteurAlign.visible = this.variable.visibleAlign;
 			}
 			
 			mean.multiply(this.variable.MAX_SPEED, this.variable.MAX_SPEED);
@@ -485,16 +541,16 @@ Fish.prototype = {
 	drawCircle: function (){
 
 		//Cercle de séparation
-		this.graphics.beginFill(this.variable.COLOR_SEPARATION, 0.5);
-		this.graphics.drawCircle(this.poisson.body.x + ((this.poisson.body.width)/2), this.poisson.body.y + ((this.poisson.body.height)/2), this.variable.SEPARATION_RADIUS * 2);
+		this.variable.cercles_separation.beginFill(this.variable.COLOR_SEPARATION, 0.5);
+		this.variable.cercles_separation.drawCircle(this.poisson.body.x + ((this.poisson.body.width)/2), this.poisson.body.y + ((this.poisson.body.height)/2), this.variable.SEPARATION_RADIUS * 2);
 		
 		//Cercle d'alignement
-		this.graphics.beginFill(this.variable.COLOR_ALIGN, 0.5);
-		this.graphics.drawCircle(this.poisson.body.x + ((this.poisson.body.width)/2), this.poisson.body.y + ((this.poisson.body.height)/2), this.variable.ALIGNMENT_RADIUS*2);
+		this.variable.cercles_align.beginFill(this.variable.COLOR_ALIGN, 0.5);
+		this.variable.cercles_align.drawCircle(this.poisson.body.x + ((this.poisson.body.width)/2), this.poisson.body.y + ((this.poisson.body.height)/2), this.variable.ALIGNMENT_RADIUS*2);
 			
 		//Cercle de cohesion
-		this.graphics.beginFill(this.variable.COLOR_COHERE, 0.5);
-		this.graphics.drawCircle(this.poisson.body.x + ((this.poisson.body.width)/2), this.poisson.body.y + ((this.poisson.body.height)/2), this.variable.COHESION_RADIUS*2);
+		this.variable.cercles_cohere.beginFill(this.variable.COLOR_COHERE, 0.5);
+		this.variable.cercles_cohere.drawCircle(this.poisson.body.x + ((this.poisson.body.width)/2), this.poisson.body.y + ((this.poisson.body.height)/2), this.variable.COHESION_RADIUS*2);
 		
 		this.pointText.x = this.poisson.body.x;
 		this.pointText.y = this.poisson.body.y;
@@ -508,8 +564,14 @@ Fish.prototype = {
 	effaceInfo: function (){
 	
 		//Efface tout les cercles
-		this.graphics.clear();
-		this.graphics.position = new Phaser.Point();
+		this.variable.cercles_separation.clear();
+		this.variable.cercles_separation.position = new Phaser.Point();
+		
+		this.variable.cercles_align.clear();
+		this.variable.cercles_align.position = new Phaser.Point();
+		
+		this.variable.cercles_cohere.clear();
+		this.variable.cercles_cohere.position = new Phaser.Point();
 		
 		//Efface tous les point
 		for (var x in this.banc){
@@ -527,7 +589,7 @@ Fish.prototype = {
 
 			var d = Phaser.Point.distance(this.poisson.body.position, this.obstacles[x].body.position);
 
-			if (d > 0 && d < 75){
+			if (d > 0 && d < 300){
 
 				var diff = Phaser.Point.subtract(this.poisson.body.position, this.obstacles[x].body.position);
 				diff.normalize();
