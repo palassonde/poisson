@@ -4,23 +4,49 @@
     <meta charset="utf-8">
     <title>Poissons</title>
     <link rel="stylesheet" href="css/style.css" type="text/css">
-    <script type="text/javascript" src="js/phaser.min.js"></script>
-    <script type="text/javascript" src="js/main.js"></script>
+    <script src="js/phaser.min.js"></script>
+	<script src="js/boot.js"></script>
+    <script src="js/preloader.js"></script>
+    <script src="js/game.js"></script>
 	
   </head>
  
   <body>
     
 	<div id="game"></div>
+
+	<script type="text/javascript">
+
+	function updateTextInput(val,id) {
+	      document.getElementById(id).value=val; 		   
+	}
 	
-	<div id="formulaire">
+	window.onload = function() {
+
+		// L'application
+		var game = new Phaser.Game(1024, 600, Phaser.AUTO, 'game');
+
+		// Les états possibles
+		game.state.add('boot', MyGame.Boot);
+		game.state.add('preloader', MyGame.Preloader);
+		game.state.add('game', MyGame.Game);
+
+		// On démarre avec l'état 'boot'
+		game.state.start('boot');
+	};
+
+	</script>
+	
+    <div id="formulaire">
 		<form>
 
 			<fieldset>
 			<legend> Modifier paramètres : </legend>
 			
+			<label for="valeur">La valeur du curseur :</label>
+			
 			<label for="nombrePoisson">Nombre de poissons :</label>
-			<input type="range" name="slider1" id="nbPoisson" value="10" min="0" max="100" onchange="updateTextInput(this.value,'nb');createFishes();"/>
+			<input type="range" name="slider1" id="nbPoisson" value="10" min="0" max="100" onchange="updateTextInput(this.value,'nb');createFishes(game);"/>
 			<input type="text" id="nb" value="10" disabled>
 			
 			<label for="rayonMoyenAlignement">Le rayon moyen d'alignement :</label>
@@ -52,15 +78,5 @@
 		</form>
 	</div>
 
-	<div id= "result"></div>
-
-	<script type="text/javascript">
-
-	    function updateTextInput(val,id) {
-	      document.getElementById(id).value=val; 
-		   
-	    }
-	</script>
-	
   </body>
 </html>
