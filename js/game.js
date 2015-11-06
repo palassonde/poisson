@@ -142,7 +142,7 @@ MyGame.Game.prototype = {
 
 variable = function () {
 
-		this.FISH_NUMBER = 5;
+		this.FISH_NUMBER = 10;
 		this.ALIGNMENT_RADIUS = 300;
 		this.COHESION_RADIUS = 300;
 		this.SEPARATION_RADIUS = 80;
@@ -294,14 +294,14 @@ Fish.prototype = {
 			
 			var d = Phaser.Point.distance(this.poisson.body.position, neighbours[x].poisson.body.position);
 			
-			if (d > 0 && d < this.variable.DESIRED_SEPARATION){
+			if (d > 0 && d < this.variable.SEPARATION_RADIUS){
 				var diff = Phaser.Point.subtract(this.poisson.body.position, neighbours[x].poisson.body.position);
 				diff.normalize();
 				diff.divide(d, d);
 				mean.add(diff.x, diff.y);
 				count++;
 				
-				tmp = d/(this.variable.DESIRED_SEPARATION);
+				tmp = d/(this.variable.SEPARATION_RADIUS);
 				if (this.magnitudeRelentir > tmp){
 					this.magnitudeRelentir = tmp;
 				}
@@ -424,7 +424,7 @@ Fish.prototype = {
 			var voisin = neighbours[x];
 			var distance = Phaser.Point.distance(this.poisson.body.position, voisin.poisson.body.position);
 
-			if (distance > 0 && distance < this.variable.NEIGHBOUR_RADIUS){
+			if (distance > 0 && distance < this.variable.ALIGNMENT_RADIUS){
 				
 				if(this.isDebug && this.variable.debug){	
 					voisin.vecteurAlign.x = voisin.poisson.body.x + ((voisin.poisson.body.width)/2);
