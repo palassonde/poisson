@@ -41,11 +41,8 @@ public class Server {
 
 				// Parsing get request
 				String[] request = str.split("\\s");
-				String filename = "";
+				String filename = request[1];
 
-				if (request.length > 1)
-					filename = request[1];
-				
 				if (filename.length() > 1)
 					filename = filename.substring(1);
 				else
@@ -115,7 +112,7 @@ public class Server {
 					out.close();
 					out.flush();
 					remote.close();
-					System.out.println("error: "+ filename + " " + e);
+					System.out.println("error: " + e);
 				}
 			
 			} catch (Exception e) {
