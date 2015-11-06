@@ -23,9 +23,13 @@
 			<input type="range" name="slider1" id="nbPoisson" value="10" min="0" max="100" onchange="updateTextInput(this.value,'nb');createFishes();"/>
 			<input type="text" id="nb" value="10" disabled>
 			
-			<label for="rayonMoyen">Le rayon moyen d'un voisinage :</label>
-			<input type="range" name="slider2" id="rayonMoyen" value="300" min="0" max="1000" onchange="updateTextInput(this.value,'rayon');setValues();"/>
-			<input type="text" id="rayon" value="300" disabled>
+			<label for="rayonMoyenAlignement">Le rayon moyen d'alignement :</label>
+			<input type="range" name="slider2" id="rayonMoyenAlignement" value="300" min="0" max="1000" onchange="updateTextInput(this.value,'rayonali');setValues();"/>
+			<input type="text" id="rayonali" value="300" disabled>
+
+			<label for="rayonMoyenCollusion">Le rayon moyen de collusion:</label>
+			<input type="range" name="slider2" id="rayonMoyenCollusion" value="300" min="0" max="1000" onchange="updateTextInput(this.value,'rayoncol');setValues();"/>
+			<input type="text" id="rayoncol" value="300" disabled>
 			
 			<label for="rayonMoyenSeparation">Le rayon moyen de séparation:</label>
 			<input type="range" name="slider3" id="rayonMoyenSeparation" value="80" min="0" max="200" onchange="updateTextInput(this.value,'rayonsep');setValues();"/>
