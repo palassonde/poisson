@@ -1,9 +1,9 @@
 Poisson
 =======
 
-Pierre-Alexandre Lassonde
-Julien Perron
-Firas Cherif
+* Pierre-Alexandre Lassonde
+* Julien Perron
+* Firas Cherif
 
 # Description 
 
