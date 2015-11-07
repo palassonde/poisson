@@ -1,6 +1,10 @@
 Poisson
 =======
 
+Pierre-Alexandre Lassonde
+Julien Perron
+Firas Cherif
+
 # Description 
 
 * Application graphique qui demontre l'utilisation d'un algorithme d'évolution d'un banc de poisson.
