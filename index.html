@@ -19,9 +19,6 @@
 
 	function updateTextInput(val,id) {
 
-		if (val > document.getElementById(id).max){
-
-		}
 	      document.getElementById(id).value=val; 		   
 	}
 	
@@ -49,31 +46,31 @@
 			
 			<label for="nombrePoisson">Nombre de poissons :</label>
 			<input type="range" name="slider1" id="nbPoisson" value="10" min="0" max="100" onchange="updateTextInput(this.value,'nb')"/>
-			<input type="text" id="nb" value="10" onchange="updateTextInput(this.value,'nb')">
+			<input type="number" id="nb" value="10"  min="0" max="100" onchange="updateTextInput(this.value,'nbPoisson' )">
 			
 			<label for="rayonMoyenAlignement">Le rayon moyen d'alignement :</label>
 			<input type="range" name="slider2" id="rayonMoyenAlignement" value="300" min="0" max="1000" onchange="updateTextInput(this.value,'rayonali')"/>
-			<input type="text" id="rayonali" value="300" disabled>
+			<input type="number" id="rayonali" value="300"  min="0" max="1000" onchange="updateTextInput(this.value,'rayonMoyenAlignement')">
 
 			<label for="rayonMoyenCohesion">Le rayon moyen de cohesion:</label>
 			<input type="range" name="slider2" id="rayonMoyenCohesion" value="300" min="0" max="1000" onchange="updateTextInput(this.value,'rayonco')"/>
-			<input type="text" id="rayonco" value="300" disabled>
+			<input type="number" id="rayonco" value="300"  min="0" max="1000" onchange="updateTextInput(this.value,'rayonMoyenCohesion')">
 			
 			<label for="rayonMoyenSeparation">Le rayon moyen de séparation:</label>
 			<input type="range" name="slider3" id="rayonMoyenSeparation" value="80" min="0" max="200" onchange="updateTextInput(this.value,'rayonsep')"/>
-			<input type="text" id="rayonsep" value="80" disabled>
+			<input type="number" id="rayonsep" value="80"  min="0" max="200" onchange="updateTextInput(this.value,'rayonMoyenSeparation')">
 			
 			<label for="vitessePoisson">vitesse des poissons :</label>
 			<input type="range" name="slider4" id="vitessePoisson" value="4" min="0" max="20" onchange="updateTextInput(this.value,'vitesse')"/>
-		    <input type="text" id="vitesse" value="4" disabled>
+		    <input type="number" id="vitesse" value="4"   min="0" max="20" onchange="updateTextInput(this.value,'vitessePoisson')">
 			 
 			<label for="vitesseAngulairePoisson">vitesse angulaire poissons :</label>
 			<input type="range" name="slider5" id="vitesseAngulairePoisson" value="100" min="0" max="200" onchange="updateTextInput(this.value,'vitesseAng')"/>
-			<input type="text" id="vitesseAng" value="100" disabled>
+			<input type="number" id="vitesseAng" value="100"  min="0" max="200" onchange="updateTextInput(this.value,'vitesseAngulairePoisson')">
 
 			<label for="force">Force maximum :</label>
 			<input type="range" name="slider6" id="force" value="1" min="0" max="10" onchange="updateTextInput(this.value,'att')"/>
-			<input type="text" id="att" value="1" disabled>
+			<input type="number" id="att" value="1" min="0" max="10" onchange="updateTextInput(this.value,'force')">
 
 			</fieldset>
 			<input type="reset" value="RESET"/>
